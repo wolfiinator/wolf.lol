@@ -177,30 +177,55 @@ document.addEventListener('DOMContentLoaded', () => {
   const customArtists = [];
   const customTracks = [];
   let driveManifestLoaded = false;
+  const audioExtensions = new Set(['.mp3', '.wav', '.m4a', '.flac', '.ogg', '.aac']);
+  const imageExtensions = new Set(['.jpg', '.jpeg', '.png', '.webp', '.gif']);
+
+  function hasExtension(fileName, extensions) {
+    const lowerName = String(fileName || '').toLowerCase();
+    return [...extensions].some((extension) => lowerName.endsWith(extension));
+  }
+
+  function resolveMediaPath(folder, file) {
+    if (!file) return '';
+    if (/^https?:\/\//i.test(file)) {
+      return file;
+    }
+    return folder ? `${folder}/${file}` : file;
+  }
+
   function appendCustomArtists(artists = []) {
     artists.forEach((artist) => {
       const artistIndex = customArtists.length;
       const folder = (artist.folder || 'music').replace(/\/$/, '');
+      const artistName = artist.name || `artist ${artistIndex + 1}`;
+      const declaredFiles = Array.isArray(artist.files) ? artist.files : [];
+      const declaredTracks = Array.isArray(artist.tracks) && artist.tracks.length > 0
+        ? artist.tracks
+        : declaredFiles.filter((file) => hasExtension(file, audioExtensions));
+      const fallbackCover = declaredFiles.find((file) => hasExtension(file, imageExtensions));
+      const coverFile = artist.cover || fallbackCover;
       const artistEntry = {
         index: artistIndex,
-        name: artist.name || `artist ${artistIndex + 1}`,
+        name: artistName,
         tracks: []
       };
 
-      (artist.tracks || []).forEach((file) => {
+      declaredTracks.forEach((file) => {
         const track = {
           index: customTracks.length,
           artistIndex,
-          artistName: artist.name || 'unknown artist',
-          src: `${folder}/${file}`,
-          coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
+          artistName,
+          src: resolveMediaPath(folder, file),
+          coverSrc: coverFile ? resolveMediaPath(folder, coverFile) : 'assets/profile.gif',
           title: decodeURIComponent(file).split('/').pop().replace(/\.[^.]+$/, '')
         };
         customTracks.push(track);
         artistEntry.tracks.push(track);
       });
 
-      customArtists.push(artistEntry);
+      if (artistEntry.tracks.length > 0) {
+        customArtists.push(artistEntry);
+      }
     });
   }
 
@@ -476,7 +501,7 @@ document.addEventListener('DOMContentLoaded', () => {
       const button = document.createElement('button');
       button.className = 'music-artist-card';
       button.type = 'button';
-      button.textContent = artist.name;
+      button.textContent = `${artist.name} (${artist.tracks.length})`;
       button.addEventListener('click', () => showMusicArtistPlayer(artist.index));
       musicArtistListNode.appendChild(button);
     });
