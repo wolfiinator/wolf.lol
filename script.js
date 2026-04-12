@@ -308,7 +308,31 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   async function initializeVisitorCounter() {
-    const fallbackBase = 7922;
+    const STORAGE_KEY = 'wolf_profile_views';
+    const parseCount = (value) => {
+      if (typeof value === 'number' && Number.isFinite(value)) return value;
+      if (typeof value === 'string') {
+        const numeric = Number(value.replace(/,/g, '').trim());
+        return Number.isFinite(numeric) ? numeric : null;
+      }
+      return null;
+    };
+
+    const markupBase = parseCount(visitorCount?.textContent) ?? 0;
+    const storedBase = parseCount(localStorage.getItem(STORAGE_KEY)) ?? 0;
+    const fallbackBase = Math.max(markupBase, storedBase);
+
+    const applyCount = (nextCount) => {
+      const safeCount = Math.max(nextCount, fallbackBase);
+      visitorCount.textContent = safeCount.toLocaleString();
+      localStorage.setItem(STORAGE_KEY, String(safeCount));
+      if (minimizedViews) {
+        minimizedViews.textContent = `views: ${visitorCount.textContent}`;
+      }
+    };
+
+    applyCount(fallbackBase);
+
     try {
       const response = await fetch('https://api.countapi.xyz/hit/wolf-lol/profile-views', { cache: 'no-store' });
       if (!response.ok) {
@@ -316,16 +340,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       const data = await response.json();
       const count = Number.isFinite(data?.value) ? data.value : fallbackBase;
-      visitorCount.textContent = count.toLocaleString();
-      if (minimizedViews) {
-        minimizedViews.textContent = `views: ${visitorCount.textContent}`;
-      }
+      applyCount(count);
     } catch (error) {
       console.error('Failed to load remote visitor count:', error);
-      visitorCount.textContent = fallbackBase.toLocaleString();
-      if (minimizedViews) {
-        minimizedViews.textContent = `views: ${visitorCount.textContent}`;
-      }
+      applyCount(fallbackBase);
     }
   }
 
@@ -644,77 +662,14 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { passive: false });
 
 
-  const name = "wolf.";
-  let nameText = '';
-  let nameIndex = 0;
-  let isNameDeleting = false;
-  let nameCursorVisible = true;
-
   function typeWriterName() {
-    if (!isNameDeleting && nameIndex < name.length) {
-      nameText = name.slice(0, nameIndex + 1);
-      nameIndex++;
-    } else if (isNameDeleting && nameIndex > 0) {
-      nameText = name.slice(0, nameIndex - 1);
-      nameIndex--;
-    } else if (nameIndex === name.length) {
-      isNameDeleting = true;
-      setTimeout(typeWriterName, 10000);
-      return;
-    } else if (nameIndex === 0) {
-      isNameDeleting = false;
-    }
-    profileName.textContent = nameText + (nameCursorVisible ? '|' : ' ');
-    if (Math.random() < 0.1) {
-      profileName.classList.add('glitch');
-      setTimeout(() => profileName.classList.remove('glitch'), 200);
-    }
-    setTimeout(typeWriterName, isNameDeleting ? 150 : 300);
+    profileName.textContent = 'wolf.';
   }
 
-  setInterval(() => {
-    nameCursorVisible = !nameCursorVisible;
-    profileName.textContent = nameText + (nameCursorVisible ? '|' : ' ');
-  }, 500);
-
-
-  const bioMessages = [
-    "love yall.",
-    "the best oat."
-  ];
-  let bioText = '';
-  let bioIndex = 0;
-  let bioMessageIndex = 0;
-  let isBioDeleting = false;
-  let bioCursorVisible = true;
 
   function typeWriterBio() {
-    if (!isBioDeleting && bioIndex < bioMessages[bioMessageIndex].length) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex + 1);
-      bioIndex++;
-    } else if (isBioDeleting && bioIndex > 0) {
-      bioText = bioMessages[bioMessageIndex].slice(0, bioIndex - 1);
-      bioIndex--;
-    } else if (bioIndex === bioMessages[bioMessageIndex].length) {
-      isBioDeleting = true;
-      setTimeout(typeWriterBio, 2000);
-      return;
-    } else if (bioIndex === 0 && isBioDeleting) {
-      isBioDeleting = false;
-      bioMessageIndex = (bioMessageIndex + 1) % bioMessages.length;
-    }
-    profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-    if (Math.random() < 0.1) {
-      profileBio.classList.add('glitch');
-      setTimeout(() => profileBio.classList.remove('glitch'), 200);
-    }
-    setTimeout(typeWriterBio, isBioDeleting ? 75 : 150);
+    profileBio.innerHTML = 'the best oat.<br>love yall.';
   }
-
-  setInterval(() => {
-    bioCursorVisible = !bioCursorVisible;
-    profileBio.textContent = bioText + (bioCursorVisible ? '|' : ' ');
-  }, 500);
 
 
   let currentAudio = musicPlayer;
