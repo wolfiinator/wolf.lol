@@ -11,11 +11,13 @@ Requires:
 from __future__ import annotations
 
 import json
+import os
+import re
 import subprocess
 import sys
 from pathlib import Path
 
-DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1zmM2c1RbJLZZFz7hnBZJb7OlpqHHKSeG?usp=sharing"
+DEFAULT_DRIVE_FOLDER_URL = "https://drive.google.com/drive/folders/1zmM2c1RbJLZZFz7hnBZJb7OlpqHHKSeG?usp=sharing"
 OUTPUT_FOLDER = Path("music/drive_import")
 MANIFEST_PATH = Path("music/drive_manifest.json")
 AUDIO_EXTENSIONS = {".mp3", ".wav", ".m4a", ".flac", ".ogg", ".aac"}
@@ -30,12 +32,21 @@ def ensure_gdown_installed() -> None:
         sys.exit(1)
 
 
-def download_drive_folder() -> None:
+def normalize_drive_folder_url(raw_url: str) -> str:
+    """Extract and normalize a Drive folder URL to reduce gdown parsing issues."""
+    match = re.search(r"/folders/([a-zA-Z0-9_-]+)", raw_url)
+    if match:
+        folder_id = match.group(1)
+        return f"https://drive.google.com/drive/folders/{folder_id}"
+    return raw_url
+
+
+def download_drive_folder(folder_url: str) -> None:
     OUTPUT_FOLDER.mkdir(parents=True, exist_ok=True)
     cmd = [
         "gdown",
         "--folder",
-        DRIVE_FOLDER_URL,
+        folder_url,
         "-O",
         str(OUTPUT_FOLDER),
         "--remaining-ok",
@@ -82,10 +93,21 @@ def write_manifest(tracks: list[str], cover: str | None) -> None:
 
 def main() -> None:
     ensure_gdown_installed()
-    download_drive_folder()
+
+    configured_url = os.environ.get("DRIVE_FOLDER_URL", DEFAULT_DRIVE_FOLDER_URL).strip()
+    folder_url = normalize_drive_folder_url(configured_url)
+
+    download_drive_folder(folder_url)
     tracks, cover = collect_files()
+
+    if not tracks:
+        print(
+            "No audio files were found after sync. Confirm the folder is public and contains supported audio files.",
+            file=sys.stderr,
+        )
+
     write_manifest(tracks, cover)
-    print(f"Synced {len(tracks)} track(s) to {MANIFEST_PATH}")
+    print(f"Synced {len(tracks)} track(s) from {folder_url} to {MANIFEST_PATH}")
 
 
 if __name__ == "__main__":
