@@ -44,8 +44,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const rainButton = document.getElementById('rain-theme');
   const animeButton = document.getElementById('anime-theme');
   const carButton = document.getElementById('car-theme');
-  const resultsButtonContainer = document.getElementById('results-button-container');
-  const resultsButton = document.getElementById('results-theme');
+  const resultsButtons = document.querySelectorAll('.results-toggle');
+  const profileClock = document.getElementById('profile-clock');
   const volumeIcon = document.getElementById('volume-icon');
   const volumeSlider = document.getElementById('volume-slider');
   const transparencySlider = document.getElementById('transparency-slider');
@@ -55,10 +55,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const glitchOverlay = document.querySelector('.glitch-overlay');
   const profileBlock = document.getElementById('profile-block');
   const skillsBlock = document.getElementById('skills-block');
-  const pythonBar = document.getElementById('python-bar');
-  const cppBar = document.getElementById('cpp-bar');
-  const csharpBar = document.getElementById('csharp-bar');
-  const resultsHint = document.getElementById('results-hint');
   const profilePicture = document.querySelector('.profile-picture');
   const profileContainer = document.querySelector('.profile-container');
   const socialIcons = document.querySelectorAll('.social-icon');
@@ -148,6 +144,19 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   initializeVisitorCounter();
+
+  function updateProfileClock() {
+    const time = new Date().toLocaleTimeString('en-US', {
+      hour: '2-digit',
+      minute: '2-digit',
+      second: '2-digit',
+      hour12: true
+    });
+    profileClock.textContent = `local time: ${time}`;
+  }
+
+  updateProfileClock();
+  setInterval(updateProfileClock, 1000);
 
 
   startScreen.addEventListener('click', () => {
@@ -420,16 +429,6 @@ document.addEventListener('DOMContentLoaded', () => {
           overlay.classList.remove('hidden');
         }
 
-        if (themeClass === 'hacker-theme') {
-          resultsButtonContainer.classList.remove('hidden');
-        } else {
-          resultsButtonContainer.classList.add('hidden');
-          skillsBlock.classList.add('hidden');
-          resultsHint.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.to(profileBlock, { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' });
-        }
-
         gsap.to(backgroundVideo, {
           opacity: 1,
           duration: 0.5,
@@ -598,49 +597,15 @@ document.addEventListener('DOMContentLoaded', () => {
 
  
   let isShowingSkills = false;
-  resultsButton.addEventListener('click', () => {
-    if (!isShowingSkills) {
-      gsap.to(profileBlock, {
-        x: -100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          profileBlock.classList.add('hidden');
-          skillsBlock.classList.remove('hidden');
-          gsap.fromTo(skillsBlock,
-            { x: 100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-          gsap.to(pythonBar, { width: '87%', duration: 2, ease: 'power2.out' });
-          gsap.to(cppBar, { width: '75%', duration: 2, ease: 'power2.out' });
-          gsap.to(csharpBar, { width: '80%', duration: 2, ease: 'power2.out' });
-        }
-      });
-      resultsHint.classList.remove('hidden');
-      isShowingSkills = true;
-    } else {
-      gsap.to(skillsBlock, {
-        x: 100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          skillsBlock.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.fromTo(profileBlock,
-            { x: -100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-        }
-      });
-      resultsHint.classList.add('hidden');
-      isShowingSkills = false;
-    }
-  });
 
-  resultsButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
+  function setResultsButtonText() {
+    const label = isShowingSkills ? 'Back to Profile' : 'View Results';
+    resultsButtons.forEach((button) => {
+      button.textContent = label;
+    });
+  }
+
+  function toggleResultsView() {
     if (!isShowingSkills) {
       gsap.to(profileBlock, {
         x: -100,
@@ -654,12 +619,8 @@ document.addEventListener('DOMContentLoaded', () => {
             { x: 100, opacity: 0 },
             { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
           );
-          gsap.to(pythonBar, { width: '87%', duration: 2, ease: 'power2.out' });
-          gsap.to(cppBar, { width: '75%', duration: 2, ease: 'power2.out' });
-          gsap.to(csharpBar, { width: '80%', duration: 2, ease: 'power2.out' });
         }
       });
-      resultsHint.classList.remove('hidden');
       isShowingSkills = true;
     } else {
       gsap.to(skillsBlock, {
@@ -676,9 +637,19 @@ document.addEventListener('DOMContentLoaded', () => {
           );
         }
       });
-      resultsHint.classList.add('hidden');
       isShowingSkills = false;
     }
+    setResultsButtonText();
+  }
+
+  setResultsButtonText();
+
+  resultsButtons.forEach((button) => {
+    button.addEventListener('click', toggleResultsView);
+    button.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      toggleResultsView();
+    });
   });
 
 

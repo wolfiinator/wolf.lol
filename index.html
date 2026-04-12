@@ -193,7 +193,7 @@
             width: 820px;
             min-height: 332px;
             background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
             padding: 20px;
             border-radius: 15px;
             z-index: 20;
@@ -211,6 +211,13 @@
             display: flex;
             align-items: flex-start;
             gap: 15px;
+        }
+
+        .card-action {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            z-index: 21;
         }
 
         .profile-container {
@@ -262,6 +269,12 @@
             display: flex;
             align-items: center;
             gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        #profile-clock {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.8);
             margin-bottom: 10px;
         }
 
@@ -469,7 +482,7 @@
             width: 820px;
             min-height: 332px;
             background: rgba(0, 0, 0, 0.7);
-            border: 1px solid rgba(255, 255, 255, 0.2);
+            border: none;
             padding: 20px;
             border-radius: 15px;
             z-index: 20;
@@ -485,6 +498,36 @@
             text-align: center;
             font-size: 24px;
             margin-bottom: 15px;
+        }
+
+        .interest-list {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 420px;
+            overflow-y: auto;
+            padding-right: 6px;
+        }
+
+        .interest-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+        }
+
+        .interest-item img {
+            width: 100%;
+            border-radius: 10px;
+            object-fit: cover;
+            max-height: 360px;
+        }
+
+        .interest-item span {
+            font-size: 13px;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .skill {
@@ -532,15 +575,7 @@
         }
 
         
-        #results-button-container {
-            position: fixed;
-            top: 20px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 20;
-        }
-
-        #results-theme {
+        .results-toggle {
             background: rgba(0, 0, 0, 0.7);
             color: white;
             border: 1px solid rgba(255, 255, 255, 0.3);
@@ -553,61 +588,9 @@
             transition: all 0.3s;
         }
 
-        #results-theme:hover {
+        .results-toggle:hover {
             background: rgba(0, 0, 0, 0.9);
             border-color: rgba(255, 255, 255, 0.8);
-        }
-
-        #results-hint {
-            position: absolute;
-            background: rgba(0, 0, 0, 0.8);
-            color: white;
-            padding: 8px 12px;
-            border-radius: 10px;
-            font-size: 12px;
-            width: 180px;
-            text-align: center;
-            pointer-events: none;
-            z-index: 25;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        #results-hint::before {
-            content: '';
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-width: 0 10px 10px 10px;
-            border-style: solid;
-            border-color: transparent transparent rgba(0, 0, 0, 0.8) transparent;
-        }
-
-        
-        .home-theme #profile-block,
-        .home-theme #skills-block {
-            border-color: rgba(0, 195, 255, 0.5);
-        }
-
-        .hacker-theme #profile-block,
-        .hacker-theme #skills-block {
-            border-color: rgba(0, 255, 0, 0.5);
-        }
-
-        .rain-theme #profile-block,
-        .rain-theme #skills-block {
-            border-color: rgba(100, 149, 237, 0.5);
-        }
-
-        .anime-theme #profile-block,
-        .anime-theme #skills-block {
-            border-color: rgba(255, 0, 255, 0.5);
-        }
-
-        .car-theme #profile-block,
-        .car-theme #skills-block {
-            border-color: rgba(255, 165, 0, 0.5);
         }
 
         
@@ -847,19 +830,9 @@
             }
 
             
-            #results-button-container {
-                top: 10px;
-            }
-
-            #results-theme {
+            .results-toggle {
                 padding: 6px 12px;
                 font-size: 12px;
-            }
-
-            #results-hint {
-                width: 150px;
-                font-size: 10px;
-                padding: 6px 10px;
             }
 
             
@@ -897,6 +870,9 @@
 
 
         <div id="profile-block">
+            <div class="card-action">
+                <button class="results-toggle">View Results</button>
+            </div>
             <div class="profile-header">
                 <div class="profile-container">
                     <img src="assets/profile.gif" alt="Profile" class="profile-picture">
@@ -927,6 +903,7 @@
                             </div>
                         </div>
                     </div>
+                    <div id="profile-clock"></div>
                     <div id="profile-bio"></div>
                 </div>
             </div>
@@ -964,43 +941,24 @@
 
 
         <div id="skills-block" class="hidden">
-            <h2 class="skills-title">Programming Skills</h2>
-            <div class="skill">
-                <div class="skill-name">
-                    <img src="assets/python.png" alt="Python" class="skill-icon">
-                    <span>Python</span>
-                    <span>87%</span>
+            <div class="card-action">
+                <button class="results-toggle">Back to Profile</button>
+            </div>
+            <h2 class="skills-title">Interests</h2>
+            <div class="interest-list">
+                <div class="interest-item">
+                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/438100/library_600x900_2x.jpg" alt="VRChat interest image">
+                    <span>VRChat</span>
                 </div>
-                <div class="skill-bar-container">
-                    <div id="python-bar" class="skill-bar"></div>
+                <div class="interest-item">
+                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/285900/library_600x900_2x.jpg" alt="Gang Beasts interest image">
+                    <span>Gang Beasts</span>
+                </div>
+                <div class="interest-item">
+                    <img src="https://www.impawards.com/2009/posters/fantastic_mr_fox_ver3.jpg" alt="Fantastic Mr. Fox interest image">
+                    <span>Fantastic Mr. Fox</span>
                 </div>
             </div>
-            <div class="skill">
-                <div class="skill-name">
-                    <img src="assets/cpp.png" alt="C++" class="skill-icon">
-                    <span>C++</span>
-                    <span>75%</span>
-                </div>
-                <div class="skill-bar-container">
-                    <div id="cpp-bar" class="skill-bar"></div>
-                </div>
-            </div>
-            <div class="skill">
-                <div class="skill-name">
-                    <img src="assets/csharp.png" alt="C#" class="skill-icon">
-                    <span>C#</span>
-                    <span>80%</span>
-                </div>
-                <div class="skill-bar-container">
-                    <div id="csharp-bar" class="skill-bar"></div>
-                </div>
-            </div>
-        </div>
-
-
-        <div id="results-button-container" class="hidden">
-            <button id="results-theme">View Results</button>
-            <div id="results-hint" class="hidden">Click again to return to profile</div>
         </div>
 
 
