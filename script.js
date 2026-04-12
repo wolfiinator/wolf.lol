@@ -95,7 +95,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  const startMessage = "Click here to see the motion baby";
+  const startMessage = "wolf.lol";
   let startTextContent = '';
   let startIndex = 0;
   let startCursorVisible = true;
@@ -236,8 +236,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const bioMessages = [
-    "Fu*k Guns.lol & Fakecrime.bio got banned too often, so I created my own.",
-    "\"Hello, World!\""
+    "love yall.",
+    "the best oat."
   ];
   let bioText = '';
   let bioIndex = 0;
@@ -275,6 +275,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   let currentAudio = backgroundMusic;
+  backgroundMusic.muted = true;
+  backgroundMusic.play().catch(err => {
+    console.error("Autoplay was blocked:", err);
+  });
   let isMuted = false;
 
   volumeIcon.addEventListener('click', () => {
