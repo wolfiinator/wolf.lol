@@ -59,9 +59,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileContainer = document.querySelector('.profile-container');
   const socialIcons = document.querySelectorAll('.social-icon');
   const badges = document.querySelectorAll('.badge');
-  const interestTabs = document.querySelectorAll('.interest-tab');
-  const interestPanels = document.querySelectorAll('.interest-panel');
-  const interestNextButton = document.getElementById('interest-next');
 
   
   const cursor = document.querySelector('.custom-cursor');
@@ -653,40 +650,6 @@ document.addEventListener('DOMContentLoaded', () => {
       e.preventDefault();
       toggleResultsView();
     });
-  });
-
-  const interestOrder = Array.from(interestTabs).map((tab) => tab.dataset.interestTarget);
-
-  function setActiveInterest(target) {
-    interestTabs.forEach((tab) => {
-      tab.classList.toggle('active', tab.dataset.interestTarget === target);
-    });
-    interestPanels.forEach((panel) => {
-      panel.classList.toggle('active', panel.dataset.interestPanel === target);
-    });
-  }
-
-  interestTabs.forEach((tab) => {
-    tab.addEventListener('click', () => {
-      setActiveInterest(tab.dataset.interestTarget);
-    });
-    tab.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      setActiveInterest(tab.dataset.interestTarget);
-    });
-  });
-
-  function goToNextInterest() {
-    const activeTab = document.querySelector('.interest-tab.active');
-    const currentIndex = interestOrder.indexOf(activeTab.dataset.interestTarget);
-    const nextIndex = (currentIndex + 1) % interestOrder.length;
-    setActiveInterest(interestOrder[nextIndex]);
-  }
-
-  interestNextButton.addEventListener('click', goToNextInterest);
-  interestNextButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    goToNextInterest();
   });
 
 

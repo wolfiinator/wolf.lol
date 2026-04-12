@@ -500,77 +500,34 @@
             margin-bottom: 15px;
         }
 
-        .interest-tabs {
+        .interest-list {
             display: flex;
-            flex-wrap: wrap;
-            gap: 8px;
-            margin-bottom: 12px;
-            justify-content: center;
-        }
-
-        .interest-tab {
-            background: rgba(255, 255, 255, 0.08);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            color: #fff;
-            border-radius: 999px;
-            padding: 6px 12px;
-            font-family: 'Minecraftia', monospace;
-            font-size: 11px;
-            cursor: pointer;
-        }
-
-        .interest-tab.active {
-            background: rgba(255, 255, 255, 0.22);
-            border-color: rgba(255, 255, 255, 0.5);
-        }
-
-        .interest-panel-wrap {
-            background: rgba(0, 0, 0, 0.25);
-            border-radius: 12px;
-            padding: 12px;
-            max-height: 440px;
+            flex-direction: column;
+            gap: 12px;
+            max-height: 420px;
             overflow-y: auto;
+            padding-right: 6px;
         }
 
-        .interest-panel {
-            display: none;
-            grid-template-columns: 220px 1fr;
-            gap: 16px;
-            align-items: start;
+        .interest-item {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 8px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
         }
 
-        .interest-panel.active {
-            display: grid;
-        }
-
-        .interest-image {
+        .interest-item img {
             width: 100%;
             border-radius: 10px;
             object-fit: cover;
+            max-height: 360px;
         }
 
-        .interest-copy h3 {
-            margin-bottom: 10px;
-            font-size: 18px;
-        }
-
-        .interest-copy p {
+        .interest-item span {
             font-size: 13px;
-            line-height: 1.6;
-            color: rgba(255, 255, 255, 0.92);
-            margin-bottom: 10px;
-        }
-
-        .interest-next {
-            margin-top: 8px;
-            margin-left: auto;
-            display: block;
-            border: none;
-            background: transparent;
-            color: #fff;
-            font-family: 'Minecraftia', monospace;
-            cursor: pointer;
-            font-size: 20px;
+            color: rgba(255, 255, 255, 0.9);
         }
 
         .skill {
@@ -991,48 +948,21 @@
             <div class="card-action">
                 <button class="results-toggle">Back to Profile</button>
             </div>
-            <h2 class="skills-title">Interests - Movies/Shows</h2>
-            <div class="interest-tabs">
-                <button class="interest-tab active" data-interest-target="beastars">Beastars</button>
-                <button class="interest-tab" data-interest-target="fantastic-mr-fox">Fantastic Mr. Fox</button>
-                <button class="interest-tab" data-interest-target="bad-guys-1">The Bad Guys</button>
-                <button class="interest-tab" data-interest-target="bad-guys-2">The Bad Guys 2</button>
-            </div>
-            <div class="interest-panel-wrap">
-                <div class="interest-panel active" data-interest-panel="beastars">
-                    <img class="interest-image" src="https://upload.wikimedia.org/wikipedia/en/e/e1/BEASTARS%2C_volume_1.jpg" alt="Beastars poster art">
-                    <div class="interest-copy">
-                        <h3>Beastars</h3>
-                        <p>A coming-of-age anime/manga set in a world of anthropomorphic animals where carnivore/herbivore tension drives almost every relationship.</p>
-                        <p>Mainly follows Legoshi balancing identity, instinct, and morality while navigating school politics and darker crime arcs.</p>
-                    </div>
+            <h2 class="skills-title">Interests</h2>
+            <div class="interest-list">
+                <div class="interest-item">
+                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/438100/library_600x900_2x.jpg" alt="VRChat interest image">
+                    <span>VRChat</span>
                 </div>
-                <div class="interest-panel" data-interest-panel="fantastic-mr-fox">
-                    <img class="interest-image" src="https://upload.wikimedia.org/wikipedia/en/a/af/Fantastic_mr_fox.jpg" alt="Fantastic Mr. Fox poster">
-                    <div class="interest-copy">
-                        <h3>Fantastic Mr. Fox</h3>
-                        <p>Wes Anderson’s stop-motion adaptation of Roald Dahl with a clever, dry-humor heist vibe and very stylized visuals.</p>
-                        <p>Mr. Fox gets pulled back into raiding farms, which starts a chaotic standoff between his family/community and three farmers.</p>
-                    </div>
+                <div class="interest-item">
+                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/285900/library_600x900_2x.jpg" alt="Gang Beasts interest image">
+                    <span>Gang Beasts</span>
                 </div>
-                <div class="interest-panel" data-interest-panel="bad-guys-1">
-                    <img class="interest-image" src="https://upload.wikimedia.org/wikipedia/en/0/00/The_Bad_Guys_poster.jpeg" alt="The Bad Guys movie poster">
-                    <div class="interest-copy">
-                        <h3>The Bad Guys (2022)</h3>
-                        <p>DreamWorks animated heist comedy where a notorious animal crew tries to go legit after getting caught.</p>
-                        <p>Fast pacing, stylish action, and a “can a villain actually change?” core theme.</p>
-                    </div>
-                </div>
-                <div class="interest-panel" data-interest-panel="bad-guys-2">
-                    <img class="interest-image" src="https://upload.wikimedia.org/wikipedia/en/b/b9/The_Bad_Guys_2_%282025%29_teaser_poster.jpg" alt="The Bad Guys 2 movie poster">
-                    <div class="interest-copy">
-                        <h3>The Bad Guys 2 (2025)</h3>
-                        <p>Sequel where the gang is pushed into another major job and has to team up under pressure instead of coasting on their “reformed” status.</p>
-                        <p>Keeps the same slick tone from the first movie while raising the stakes and scale.</p>
-                    </div>
+                <div class="interest-item">
+                    <img src="https://www.impawards.com/2009/posters/fantastic_mr_fox_ver3.jpg" alt="Fantastic Mr. Fox interest image">
+                    <span>Fantastic Mr. Fox</span>
                 </div>
             </div>
-            <button id="interest-next" class="interest-next">Next →</button>
         </div>
 
 
