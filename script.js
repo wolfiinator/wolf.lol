@@ -107,8 +107,6 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   
-  const themeClasses = ['home-theme', 'hacker-theme', 'rain-theme', 'anime-theme', 'car-theme'];
-
   const fallbackManifest = {
     folder: 'assets',
     tracks: [
@@ -137,19 +135,11 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  let musicManifest = parseMusicManifest();
+  const musicManifest = parseMusicManifest();
 
   function resolveTrackSrc(track) {
-    if (!track) return '';
-    if (track.src) return track.src;
-
-    const file = track.file || '';
-    if (/^https?:\/\//i.test(file)) {
-      return file;
-    }
-
-    const folder = (track.folder ?? musicManifest.folder ?? 'assets').replace(/\/$/, '');
-    return folder ? `${folder}/${file}` : file;
+    const folder = (musicManifest.folder || 'assets').replace(/\/$/, '');
+    return `${folder}/${track.file}`;
   }
 
   function findTrackByTheme(themeClass) {
@@ -174,96 +164,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
+  const customMusicManifest = parseCustomPlayerManifest();
   const customArtists = [];
   const customTracks = [];
-  let driveManifestLoaded = false;
-  function appendCustomArtists(artists = []) {
-    artists.forEach((artist) => {
-      const artistIndex = customArtists.length;
-      const folder = (artist.folder || 'music').replace(/\/$/, '');
-      const artistEntry = {
-        index: artistIndex,
-        name: artist.name || `artist ${artistIndex + 1}`,
-        tracks: []
-      };
-
-      (artist.tracks || []).forEach((file) => {
-        const track = {
-          index: customTracks.length,
-          artistIndex,
-          artistName: artist.name || 'unknown artist',
-          src: `${folder}/${file}`,
-          coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
-          title: decodeURIComponent(file).split('/').pop().replace(/\.[^.]+$/, '')
-        };
-        customTracks.push(track);
-        artistEntry.tracks.push(track);
-      });
-
-      customArtists.push(artistEntry);
-    });
-  }
-
-  function applyDriveThemeManifest(manifest) {
-    const flattenedTracks = [];
-
-    (manifest.artists || []).forEach((artist) => {
-      const folder = (artist.folder || '').replace(/\/$/, '');
-      (artist.tracks || []).forEach((trackFile) => {
-        const source = /^https?:\/\//i.test(trackFile)
-          ? trackFile
-          : (folder ? `${folder}/${trackFile}` : trackFile);
-        flattenedTracks.push({
-          name: decodeURIComponent(trackFile).split('/').pop().replace(/\.[^.]+$/, ''),
-          src: source
-        });
-      });
-    });
-
-    if (flattenedTracks.length === 0) {
-      return;
-    }
-
-    musicManifest = {
-      folder: '',
-      tracks: themeClasses.map((themeClass, index) => ({
-        ...flattenedTracks[index % flattenedTracks.length],
-        theme: themeClass
-      }))
+  customMusicManifest.artists.forEach((artist, artistIndex) => {
+    const folder = (artist.folder || 'music').replace(/\/$/, '');
+    const artistEntry = {
+      index: artistIndex,
+      name: artist.name || `artist ${artistIndex + 1}`,
+      tracks: []
     };
 
-    if (currentAudio && !albumPlayer?.paused) {
-      return;
-    }
+    (artist.tracks || []).forEach((file) => {
+      const track = {
+        index: customTracks.length,
+        artistIndex,
+        artistName: artist.name || 'unknown artist',
+        src: `${folder}/${file}`,
+        coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
+        title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
+      };
+      customTracks.push(track);
+      artistEntry.tracks.push(track);
+    });
 
-    playTrackForTheme(document.body.classList[0] || 'home-theme');
-  }
-
-  async function loadDriveMusicManifest() {
-    try {
-      const response = await fetch('music/drive_manifest.json', { cache: 'no-store' });
-      if (!response.ok) {
-        return;
-      }
-      const parsed = await response.json();
-      if (!Array.isArray(parsed?.artists) || parsed.artists.length === 0) {
-        return;
-      }
-      appendCustomArtists(parsed.artists);
-      driveManifestLoaded = true;
-      applyDriveThemeManifest(parsed);
-      renderArtistList();
-      if (activeArtistIndex >= 0) {
-        renderTrackList();
-        updateActiveTrackUI();
-      }
-    } catch (err) {
-      console.error('Failed to load drive music manifest:', err);
-    }
-  }
-
-  const customMusicManifest = parseCustomPlayerManifest();
-  appendCustomArtists(customMusicManifest.artists);
+    customArtists.push(artistEntry);
+  });
   let activeCustomTrackIndex = -1;
   let activeArtistIndex = -1;
 
@@ -332,28 +258,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function initializeVisitorCounter() {
     const fallbackBase = 7922;
-    const counterNamespace = 'wolf-lol';
-    const counterKey = 'profile-views';
-    const storageKey = 'wolf-visitor-counted-date';
-    const todayKey = new Date().toISOString().slice(0, 10);
-
     try {
-      const shouldIncrement = localStorage.getItem(storageKey) !== todayKey;
-      const endpoint = shouldIncrement
-        ? `https://api.countapi.xyz/hit/${counterNamespace}/${counterKey}`
-        : `https://api.countapi.xyz/get/${counterNamespace}/${counterKey}`;
-      const response = await fetch(endpoint, { cache: 'no-store' });
+      const response = await fetch('https://api.countapi.xyz/hit/wolf-lol/profile-views', { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Count API failed with ${response.status}`);
       }
-
       const data = await response.json();
       const count = Number.isFinite(data?.value) ? data.value : fallbackBase;
       visitorCount.textContent = count.toLocaleString();
-
-      if (shouldIncrement) {
-        localStorage.setItem(storageKey, todayKey);
-      }
     } catch (error) {
       console.error('Failed to load remote visitor count:', error);
       visitorCount.textContent = fallbackBase.toLocaleString();
@@ -466,9 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
     musicArtistListNode.innerHTML = '';
 
     if (customArtists.length === 0) {
-      musicArtistListNode.textContent = driveManifestLoaded
-        ? 'No artists configured yet.'
-        : 'No artists configured yet. Run `python3 scripts/sync_drive_music.py` to import from Google Drive.';
+      musicArtistListNode.textContent = 'No artists configured yet.';
       return;
     }
 
@@ -1098,7 +1008,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateInterestTab('beastars');
   renderArtistList();
-  loadDriveMusicManifest();
   showMusicArtistList();
   refreshPlayPauseButton();
   refreshLoopButton();
