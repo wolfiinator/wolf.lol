@@ -130,14 +130,10 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeVisitorCounter() {
     let totalVisitors = localStorage.getItem('totalVisitorCount');
     if (!totalVisitors) {
-      totalVisitors = 7928;
+      totalVisitors = 7922;
       localStorage.setItem('totalVisitorCount', totalVisitors);
     } else {
       totalVisitors = parseInt(totalVisitors);
-      if (Number.isNaN(totalVisitors) || totalVisitors > 50000 || totalVisitors < 7928) {
-        totalVisitors = 7928;
-        localStorage.setItem('totalVisitorCount', totalVisitors);
-      }
     }
 
     const hasVisited = localStorage.getItem('hasVisited');
