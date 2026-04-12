@@ -239,14 +239,10 @@
                 var(--primary-color, #00CED1) 10%,
                 transparent 15%
             );
-            animation: orbit 3s linear infinite;
+            transform: rotate(calc(var(--orbit-angle, 0) * 1deg));
             z-index: -1;
             filter: blur(1px);
             box-shadow: none;
-        }
-
-        .profile-container.fast-orbit::after {
-            animation: fast-orbit 0.5s linear forwards;
         }
 
         .profile-picture {
@@ -488,6 +484,8 @@
             display: flex;
             flex-direction: column;
             gap: 12px;
+            animation: music-modal-pop 0.35s ease-out;
+            box-shadow: 0 0 28px rgba(37, 99, 235, 0.35);
         }
 
         .music-modal-header {
@@ -512,6 +510,13 @@
             object-fit: cover;
             border-radius: 10px;
             border: 1px solid rgba(255, 255, 255, 0.15);
+            transition: transform 0.25s ease, filter 0.25s ease;
+            transform-origin: center;
+        }
+
+        .music-cover.playing {
+            animation: cover-spin 8s linear infinite;
+            filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.55));
         }
 
         .music-list {
@@ -536,6 +541,23 @@
             border-radius: 8px;
             padding: 8px 10px;
             cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .music-track-button::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -140%;
+            width: 120%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.25), transparent);
+            transition: left 0.4s ease;
+        }
+
+        .music-track-button:hover::after {
+            left: 140%;
         }
 
         .music-track-button.active {
@@ -558,6 +580,28 @@
             cursor: pointer;
         }
 
+        .music-equalizer {
+            display: flex;
+            align-items: end;
+            gap: 4px;
+            height: 18px;
+        }
+
+        .music-equalizer span {
+            width: 3px;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.85);
+            box-shadow: 0 0 10px rgba(59, 130, 246, 0.7);
+            animation: eq-idle 1.2s ease-in-out infinite;
+            transform-origin: bottom;
+        }
+
+        .music-equalizer.playing span:nth-child(1) { animation: eq-beat 0.9s ease-in-out infinite 0.1s; }
+        .music-equalizer.playing span:nth-child(2) { animation: eq-beat 0.8s ease-in-out infinite 0.25s; }
+        .music-equalizer.playing span:nth-child(3) { animation: eq-beat 1s ease-in-out infinite 0s; }
+        .music-equalizer.playing span:nth-child(4) { animation: eq-beat 0.7s ease-in-out infinite 0.18s; }
+        .music-equalizer.playing span:nth-child(5) { animation: eq-beat 0.85s ease-in-out infinite 0.33s; }
+
         .social-links {
             display: flex;
             justify-content: center;
@@ -567,17 +611,47 @@
             opacity: 1 !important;
         }
 
-        .social-icon {
-            width: 36px;
-            height: 36px;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+        .social-link-btn {
+            width: 38px;
+            height: 38px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid rgba(255, 255, 255, 0.28);
+            background: rgba(0, 0, 0, 0.45);
+            color: #fff;
+            box-shadow: 0 0 10px rgba(255, 255, 255, 0.2), inset 0 0 8px rgba(255, 255, 255, 0.15);
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease;
             pointer-events: auto;
-            opacity: 1 !important;
         }
 
-        .social-icon:hover {
-            transform: scale(1.4) rotateY(15deg);
+        .social-link-btn svg {
+            width: 18px;
+            height: 18px;
+            fill: currentColor;
+            opacity: 0.95;
+            filter: grayscale(1);
+        }
+
+        .social-link-btn:hover {
+            transform: translateY(-3px) scale(1.08);
+            border-color: rgba(255, 255, 255, 0.72);
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 20px rgba(59, 130, 246, 0.35);
+        }
+
+        .theme-loop-indicator {
+            position: fixed;
+            bottom: calc(50% - 240px - 18px);
+            left: 50%;
+            transform: translateX(-50%);
+            width: 34px;
+            height: 10px;
+            border-radius: 999px;
+            background: linear-gradient(90deg, #1E3A8A, #2563EB);
+            box-shadow: 0 0 12px rgba(37, 99, 235, 0.7);
+            z-index: 20;
+            animation: rain-loop 2.1s linear infinite;
         }
 
         
@@ -763,13 +837,36 @@
             }
         }
 
-        @keyframes fast-orbit {
-            0% {
-                transform: rotate(0deg);
+        @keyframes cover-spin {
+            from { transform: scale(1.01) rotate(0deg); }
+            to { transform: scale(1.01) rotate(360deg); }
+        }
+
+        @keyframes eq-idle {
+            0%, 100% { height: 6px; opacity: 0.45; }
+            50% { height: 10px; opacity: 0.75; }
+        }
+
+        @keyframes eq-beat {
+            0%, 100% { height: 5px; }
+            50% { height: 17px; }
+        }
+
+        @keyframes music-modal-pop {
+            from {
+                transform: translateY(10px) scale(0.97);
+                opacity: 0;
             }
-            100% {
-                transform: rotate(360deg);
+            to {
+                transform: translateY(0) scale(1);
+                opacity: 1;
             }
+        }
+
+        @keyframes rain-loop {
+            0% { filter: hue-rotate(0deg); transform: translateX(-50%) scaleX(0.92); }
+            50% { filter: hue-rotate(18deg); transform: translateX(-50%) scaleX(1.08); }
+            100% { filter: hue-rotate(0deg); transform: translateX(-50%) scaleX(0.92); }
         }
 
         
@@ -888,9 +985,9 @@
                 justify-content: center;
             }
 
-            .social-icon {
-                width: 32px;
-                height: 32px;
+            .social-link-btn {
+                width: 34px;
+                height: 34px;
             }
 
             .visitor-counter {
@@ -1061,17 +1158,14 @@
             <div class="profile-footer">
 
                 <div class="social-links">
-                    <a href="https://discord.gg/motiongoats" target="_blank">
-                        <img src="assets/discord.png" alt="Discord" class="social-icon">
+                    <a href="https://www.roblox.com/users/1431265/profile" target="_blank" class="social-link-btn" aria-label="Roblox profile">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.4 2.5h15.2l1.9 1.9v15.2l-1.9 1.9H4.4L2.5 19.6V4.4L4.4 2.5zm2.2 2.2v14.6h10.8V4.7H6.6zm2.9 2.9h5.1v5.1H9.5V7.6z"/></svg>
                     </a>
-                    <a href="https://github.com/wolf" target="_blank">
-                        <img src="assets/github.png" alt="GitHub" class="social-icon">
+                    <a href="https://open.spotify.com/user/31lez5xyleoiud5hvbqgt5mgfwzq?si=68d2ab23bd1c406c" target="_blank" class="social-link-btn" aria-label="Spotify profile">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.59 14.41a.75.75 0 0 1-1.03.24c-2.83-1.73-6.39-2.12-10.58-1.16a.75.75 0 0 1-.34-1.46c4.59-1.05 8.53-.6 11.7 1.34.35.22.46.68.25 1.04zm1.47-2.86a.93.93 0 0 1-1.28.3c-3.24-1.99-8.18-2.57-12.02-1.41a.93.93 0 0 1-.54-1.78c4.39-1.33 9.86-.68 13.53 1.58.44.26.58.84.31 1.31zm.12-2.98C14.3 8.26 7.84 8.05 4.13 9.17a1.11 1.11 0 0 1-.64-2.13c4.26-1.29 11.35-1.04 15.85 1.64a1.11 1.11 0 1 1-1.16 1.89z"/></svg>
                     </a>
-                    <a href="https://www.youtube.com/@wolf" target="_blank">
-                        <img src="assets/youtube.png" alt="YouTube" class="social-icon">
-                    </a>
-                    <a href="https://www.tiktok.com/@wolf" target="_blank">
-                        <img src="assets/tiktok.png" alt="TikTok" class="social-icon">
+                    <a href="https://www.tiktok.com/@c0smicc2" target="_blank" class="social-link-btn" aria-label="TikTok profile">
+                        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M14.5 3h2.9c.2 1.8 1.2 3.3 2.9 4v3a8.3 8.3 0 0 1-2.9-.6V16a5.4 5.4 0 1 1-5.4-5.4h.5v3a2.4 2.4 0 1 0 1.9 2.4V3z"/></svg>
                     </a>
                 </div>
 
@@ -1112,13 +1206,7 @@
         </div>
 
 
-        <div class="controls">
-            <div id="home-theme" class="theme-button">1</div>
-            <div id="hacker-theme" class="theme-button">2</div>
-            <div id="rain-theme" class="theme-button">3</div>
-            <div id="anime-theme" class="theme-button">4</div>
-            <div id="car-theme" class="theme-button">5</div>
-        </div>
+        <div class="theme-loop-indicator" aria-hidden="true"></div>
 
 
         <div class="top-controls">
@@ -1142,6 +1230,9 @@
         <div class="music-modal-content">
             <div class="music-modal-header">
                 <h3>Music Player</h3>
+                <div id="music-equalizer" class="music-equalizer" aria-hidden="true">
+                    <span></span><span></span><span></span><span></span><span></span>
+                </div>
                 <button id="music-close" class="music-close" type="button">Close</button>
             </div>
             <img id="music-cover" class="music-cover" src="assets/profile.gif" alt="Album cover">
