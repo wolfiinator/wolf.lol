@@ -1,7 +1,7 @@
 let hasUserInteracted = false;
+let didApplyVideoFallback = false;
 
 function initMedia() {
-  console.log("initMedia called");
   const musicPlayer = document.getElementById('music-player');
   const backgroundVideo = document.getElementById('background');
   if (!musicPlayer || !backgroundVideo) {
@@ -13,6 +13,8 @@ function initMedia() {
   backgroundVideo.loop = true;
 
   const applyVideoFallback = () => {
+    if (didApplyVideoFallback) return;
+    didApplyVideoFallback = true;
     document.body.classList.add('video-fallback');
     backgroundVideo.classList.add('hidden');
   };
@@ -23,9 +25,17 @@ function initMedia() {
   }
 
   
-  backgroundVideo.play().catch(err => {
-    console.error("Failed to play background video:", err);
+  const keepVideoAlive = () => {
+    if (document.hidden || didApplyVideoFallback) return;
+    backgroundVideo.play().catch(() => {});
+  };
+
+  ['waiting', 'stalled', 'suspend', 'ended'].forEach((eventName) => {
+    backgroundVideo.addEventListener(eventName, keepVideoAlive);
   });
+
+  document.addEventListener('visibilitychange', keepVideoAlive);
+  keepVideoAlive();
 }
 
 document.addEventListener('DOMContentLoaded', async () => {
@@ -96,6 +106,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const miniPlayPauseButton = document.getElementById('mini-play-pause');
   const miniPrevButton = document.getElementById('mini-prev');
   const miniNextButton = document.getElementById('mini-next');
+  const prefersReducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  const isCoarsePointer = window.matchMedia('(pointer: coarse)').matches;
+
+  initMedia();
 
   const interestsContent = {
     beastars: {
@@ -590,7 +604,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
 
-  startScreen.addEventListener('click', () => {
+  let hasStartedExperience = false;
+  const startExperience = () => {
+    if (hasStartedExperience) return;
+    hasStartedExperience = true;
     startScreen.classList.add('hidden');
     currentAudio.muted = false;
     currentAudio.play().catch(err => {
@@ -604,7 +621,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         
       }}
     );
-    if (!isTouchDevice) {
+    if (!isTouchDevice && !prefersReducedMotion) {
       try {
         new cursorTrailEffect({
           length: 10,
@@ -618,38 +635,13 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     typeWriterName();
     typeWriterBio();
-  });
+  };
 
+  startScreen.addEventListener('click', startExperience);
   startScreen.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    startScreen.classList.add('hidden');
-    currentAudio.muted = false;
-    currentAudio.play().catch(err => {
-      console.error("Failed to play music after start screen touch:", err);
-    });
-    profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
-        profileBlock.classList.add('profile-appear');
-        
-      }}
-    );
-    if (!isTouchDevice) {
-      try {
-        new cursorTrailEffect({
-          length: 10,
-          size: 8,
-          speed: 0.2
-        });
-        console.log("Cursor trail initialized");
-      } catch (err) {
-        console.error("Failed to initialize cursor trail effect:", err);
-      }
-    }
-    typeWriterName();
-    typeWriterBio();
-  });
+    startExperience();
+  }, { passive: false });
 
 
   const name = "wolf.";
@@ -863,7 +855,10 @@ document.addEventListener('DOMContentLoaded', async () => {
       duration: 0.5,
       ease: 'power2.in',
       onComplete: () => {
-        backgroundVideo.src = videoSrc;
+        if (backgroundVideo.src && !backgroundVideo.src.endsWith(videoSrc)) {
+          backgroundVideo.src = videoSrc;
+          backgroundVideo.load();
+        }
 
         if (currentAudio) {
           currentAudio.pause();
@@ -889,7 +884,9 @@ document.addEventListener('DOMContentLoaded', async () => {
           duration: 0.5,
           ease: 'power2.out',
           onComplete: () => {
-            
+            if (!document.hidden) {
+              backgroundVideo.play().catch(() => {});
+            }
           }
         });
       }
@@ -945,17 +942,35 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
-  profileBlock.addEventListener('mousemove', (e) => handleTilt(e, profileBlock));
+  const tiltState = {
+    profile: { scheduled: false, event: null },
+    skills: { scheduled: false, event: null }
+  };
+
+  function scheduleTilt(stateKey, e, element) {
+    const state = tiltState[stateKey];
+    state.event = e;
+    if (state.scheduled || prefersReducedMotion || isCoarsePointer) return;
+    state.scheduled = true;
+    requestAnimationFrame(() => {
+      state.scheduled = false;
+      if (state.event) {
+        handleTilt(state.event, element);
+      }
+    });
+  }
+
+  profileBlock.addEventListener('mousemove', (e) => scheduleTilt('profile', e, profileBlock));
   profileBlock.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    handleTilt(e, profileBlock);
-  });
+    scheduleTilt('profile', e, profileBlock);
+  }, { passive: false });
 
-  skillsBlock.addEventListener('mousemove', (e) => handleTilt(e, skillsBlock));
+  skillsBlock.addEventListener('mousemove', (e) => scheduleTilt('skills', e, skillsBlock));
   skillsBlock.addEventListener('touchmove', (e) => {
     e.preventDefault();
-    handleTilt(e, skillsBlock);
-  });
+    scheduleTilt('skills', e, skillsBlock);
+  }, { passive: false });
 
   profileBlock.addEventListener('mouseleave', () => {
     gsap.to(profileBlock, {
