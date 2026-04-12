@@ -38,18 +38,20 @@ document.addEventListener('DOMContentLoaded', () => {
   const albumPlayer = document.getElementById('album-player');
   const musicManifestNode = document.getElementById('music-manifest');
   const customPlayerManifestNode = document.getElementById('custom-player-manifest');
-  const openMusicPlayerButton = document.getElementById('open-music-player');
   const openMoreButton = document.getElementById('open-more');
   const closeMoreButton = document.getElementById('close-more');
   const moreHomeView = document.getElementById('more-home-view');
   const moreMusicView = document.getElementById('more-music-view');
   const moreInterestsView = document.getElementById('more-interests-view');
+  const musicArtistSelectView = document.getElementById('music-artist-select-view');
+  const musicArtistPlayerView = document.getElementById('music-artist-player-view');
+  const musicArtistListNode = document.getElementById('music-artist-list');
+  const musicArtistHeading = document.getElementById('music-artist-heading');
+  const musicArtistBackButton = document.getElementById('music-artist-back');
   const openMoreMusicButton = document.getElementById('open-more-music');
   const openMoreInterestsButton = document.getElementById('open-more-interests');
   const moreMusicBackButton = document.getElementById('more-music-back');
   const moreInterestsBackButton = document.getElementById('more-interests-back');
-  const musicModal = document.getElementById('music-modal');
-  const musicCloseButton = document.getElementById('music-close');
   const musicListNode = document.getElementById('music-list');
   const musicNowPlayingNode = document.getElementById('music-now-playing');
   const musicCoverNode = document.getElementById('music-cover');
@@ -163,15 +165,33 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   const customMusicManifest = parseCustomPlayerManifest();
-  const customTracks = customMusicManifest.artists.flatMap((artist) =>
-    (artist.tracks || []).map((file) => ({
-      artistName: artist.name || 'unknown artist',
-      src: `${(artist.folder || 'music').replace(/\/$/, '')}/${file}`,
-      coverSrc: `${(artist.folder || 'music').replace(/\/$/, '')}/${artist.cover || ''}`,
-      title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
-    }))
-  );
+  const customArtists = [];
+  const customTracks = [];
+  customMusicManifest.artists.forEach((artist, artistIndex) => {
+    const folder = (artist.folder || 'music').replace(/\/$/, '');
+    const artistEntry = {
+      index: artistIndex,
+      name: artist.name || `artist ${artistIndex + 1}`,
+      tracks: []
+    };
+
+    (artist.tracks || []).forEach((file) => {
+      const track = {
+        index: customTracks.length,
+        artistIndex,
+        artistName: artist.name || 'unknown artist',
+        src: `${folder}/${file}`,
+        coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
+        title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
+      };
+      customTracks.push(track);
+      artistEntry.tracks.push(track);
+    });
+
+    customArtists.push(artistEntry);
+  });
   let activeCustomTrackIndex = -1;
+  let activeArtistIndex = -1;
 
 
   const cursor = document.querySelector('.custom-cursor');
@@ -268,33 +288,6 @@ document.addEventListener('DOMContentLoaded', () => {
   updateProfileClock();
   setInterval(updateProfileClock, 1000);
 
-  function openMusicModal() {
-    if (!musicModal) return;
-    musicModal.classList.remove('hidden');
-    requestAnimationFrame(() => {
-      musicModal.classList.add('is-visible');
-    });
-    if (profileBlock) {
-      profileBlock.classList.add('music-panel-open');
-    }
-    musicModal.setAttribute('aria-hidden', 'false');
-    updateMusicAnimations();
-  }
-
-  function closeMusicModal() {
-    if (!musicModal) return;
-    musicModal.classList.remove('is-visible');
-    if (profileBlock) {
-      profileBlock.classList.remove('music-panel-open');
-    }
-    window.setTimeout(() => {
-      if (!musicModal.classList.contains('is-visible')) {
-        musicModal.classList.add('hidden');
-      }
-    }, 360);
-    musicModal.setAttribute('aria-hidden', 'true');
-  }
-
   function refreshPlayPauseButton() {
     if (!musicPlayPauseButton || !albumPlayer) return;
     musicPlayPauseButton.textContent = albumPlayer.paused ? 'Play' : 'Pause';
@@ -320,46 +313,91 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!musicListNode) return;
     musicListNode.innerHTML = '';
 
-    if (customTracks.length === 0) {
+    if (activeArtistIndex < 0 || !customArtists[activeArtistIndex]) {
+      musicListNode.textContent = 'Select an artist.';
+      return;
+    }
+
+    if (customArtists[activeArtistIndex].tracks.length === 0) {
       musicListNode.textContent = 'No songs added yet.';
       return;
     }
 
-    const grouped = customTracks.reduce((acc, track, index) => {
-      if (!acc[track.artistName]) {
-        acc[track.artistName] = [];
-      }
-      acc[track.artistName].push({ ...track, index });
-      return acc;
-    }, {});
+    const artistLabel = document.createElement('div');
+    artistLabel.className = 'music-artist';
+    artistLabel.textContent = customArtists[activeArtistIndex].name;
+    musicListNode.appendChild(artistLabel);
 
-    Object.entries(grouped).forEach(([artistName, tracks]) => {
-      const artistLabel = document.createElement('div');
-      artistLabel.className = 'music-artist';
-      artistLabel.textContent = artistName;
-      musicListNode.appendChild(artistLabel);
-
-      tracks.forEach((track) => {
-        const button = document.createElement('button');
-        button.className = 'music-track-button';
-        button.type = 'button';
-        button.textContent = track.title;
-        button.addEventListener('click', () => playCustomTrack(track.index));
-        musicListNode.appendChild(button);
-      });
+    customArtists[activeArtistIndex].tracks.forEach((track) => {
+      const button = document.createElement('button');
+      button.className = 'music-track-button';
+      button.type = 'button';
+      button.dataset.trackIndex = String(track.index);
+      button.textContent = track.title;
+      button.addEventListener('click', () => playCustomTrack(track.index));
+      musicListNode.appendChild(button);
     });
   }
 
   function updateActiveTrackUI() {
     const trackButtons = document.querySelectorAll('.music-track-button');
-    trackButtons.forEach((button, index) => {
-      button.classList.toggle('active', index === activeCustomTrackIndex);
+    trackButtons.forEach((button) => {
+      button.classList.toggle('active', Number(button.dataset.trackIndex) === activeCustomTrackIndex);
+    });
+  }
+
+  function showMusicArtistList() {
+    if (musicArtistSelectView) {
+      musicArtistSelectView.classList.remove('hidden');
+    }
+    if (musicArtistPlayerView) {
+      musicArtistPlayerView.classList.add('hidden');
+    }
+    activeArtistIndex = -1;
+  }
+
+  function showMusicArtistPlayer(artistIndex) {
+    if (!customArtists[artistIndex]) return;
+    activeArtistIndex = artistIndex;
+    if (musicArtistHeading) {
+      musicArtistHeading.textContent = customArtists[artistIndex].name;
+    }
+    if (musicArtistSelectView) {
+      musicArtistSelectView.classList.add('hidden');
+    }
+    if (musicArtistPlayerView) {
+      musicArtistPlayerView.classList.remove('hidden');
+      gsap.fromTo(musicArtistPlayerView, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.26, ease: 'power2.out' });
+    }
+    renderTrackList();
+    updateActiveTrackUI();
+  }
+
+  function renderArtistList() {
+    if (!musicArtistListNode) return;
+    musicArtistListNode.innerHTML = '';
+
+    if (customArtists.length === 0) {
+      musicArtistListNode.textContent = 'No artists configured yet.';
+      return;
+    }
+
+    customArtists.forEach((artist) => {
+      const button = document.createElement('button');
+      button.className = 'music-artist-card';
+      button.type = 'button';
+      button.textContent = artist.name;
+      button.addEventListener('click', () => showMusicArtistPlayer(artist.index));
+      musicArtistListNode.appendChild(button);
     });
   }
 
   function playCustomTrack(index) {
     if (!albumPlayer || index < 0 || index >= customTracks.length) return;
     const track = customTracks[index];
+    if (activeArtistIndex !== track.artistIndex) {
+      showMusicArtistPlayer(track.artistIndex);
+    }
     activeCustomTrackIndex = index;
     albumPlayer.src = track.src;
     albumPlayer.volume = volumeSlider.value;
@@ -819,10 +857,33 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
  
+  let activeMoreSubview = moreHomeView;
+
   function showMoreSubview(targetView) {
-    [moreHomeView, moreMusicView, moreInterestsView].forEach((view) => {
-      if (!view) return;
-      view.classList.toggle('hidden', view !== targetView);
+    if (!targetView || targetView === activeMoreSubview) return;
+    const currentView = activeMoreSubview;
+    const revealTarget = () => {
+      targetView.classList.remove('hidden');
+      gsap.fromTo(targetView, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.28, ease: 'power2.out' });
+      activeMoreSubview = targetView;
+    };
+
+    if (!currentView || currentView.classList.contains('hidden')) {
+      revealTarget();
+      return;
+    }
+
+    gsap.to(currentView, {
+      autoAlpha: 0,
+      y: -8,
+      duration: 0.2,
+      ease: 'power2.in',
+      onComplete: () => {
+        currentView.classList.add('hidden');
+        currentView.style.opacity = '';
+        currentView.style.transform = '';
+        revealTarget();
+      }
     });
   }
 
@@ -835,6 +896,8 @@ document.addEventListener('DOMContentLoaded', () => {
       onComplete: () => {
         profileBlock.classList.add('hidden');
         skillsBlock.classList.remove('hidden');
+        [moreHomeView, moreMusicView, moreInterestsView].forEach((view) => view && view.classList.add('hidden'));
+        activeMoreSubview = null;
         showMoreSubview(moreHomeView);
         gsap.fromTo(skillsBlock,
           { x: 100, opacity: 0 },
@@ -853,6 +916,7 @@ document.addEventListener('DOMContentLoaded', () => {
       onComplete: () => {
         skillsBlock.classList.add('hidden');
         profileBlock.classList.remove('hidden');
+        showMusicArtistList();
         showMoreSubview(moreHomeView);
         gsap.fromTo(profileBlock,
           { x: -100, opacity: 0 },
@@ -879,7 +943,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (openMoreMusicButton) {
-    openMoreMusicButton.addEventListener('click', () => showMoreSubview(moreMusicView));
+    openMoreMusicButton.addEventListener('click', () => {
+      showMusicArtistList();
+      showMoreSubview(moreMusicView);
+    });
   }
 
   if (openMoreInterestsButton) {
@@ -887,7 +954,10 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (moreMusicBackButton) {
-    moreMusicBackButton.addEventListener('click', () => showMoreSubview(moreHomeView));
+    moreMusicBackButton.addEventListener('click', () => {
+      showMusicArtistList();
+      showMoreSubview(moreHomeView);
+    });
   }
 
   if (moreInterestsBackButton) {
@@ -897,11 +967,29 @@ document.addEventListener('DOMContentLoaded', () => {
   function updateInterestTab(interestKey) {
     const interest = interestsContent[interestKey];
     if (!interest || !interestImage || !interestName || !interestDescription) return;
+    const applyInterest = () => {
+      interestImage.src = interest.image;
+      interestImage.alt = interest.alt;
+      interestName.textContent = interest.name;
+      interestDescription.textContent = interest.description;
+      const interestItem = interestImage.closest('.interest-item');
+      if (interestItem) {
+        gsap.fromTo(interestItem, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.24, ease: 'power2.out' });
+      }
+    };
 
-    interestImage.src = interest.image;
-    interestImage.alt = interest.alt;
-    interestName.textContent = interest.name;
-    interestDescription.textContent = interest.description;
+    const interestItem = interestImage.closest('.interest-item');
+    if (interestItem) {
+      gsap.to(interestItem, {
+        autoAlpha: 0,
+        y: -6,
+        duration: 0.15,
+        ease: 'power2.in',
+        onComplete: applyInterest
+      });
+    } else {
+      applyInterest();
+    }
 
     interestTabs.forEach((tab) => {
       const isActive = tab.dataset.interest === interestKey;
@@ -919,28 +1007,13 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   updateInterestTab('beastars');
-  renderTrackList();
+  renderArtistList();
+  showMusicArtistList();
   refreshPlayPauseButton();
   refreshLoopButton();
 
-  if (openMusicPlayerButton) {
-    openMusicPlayerButton.addEventListener('click', openMusicModal);
-    openMusicPlayerButton.addEventListener('touchstart', (e) => {
-      e.preventDefault();
-      openMusicModal();
-    });
-  }
-
-  if (musicCloseButton) {
-    musicCloseButton.addEventListener('click', closeMusicModal);
-  }
-
-  if (musicModal) {
-    musicModal.addEventListener('click', (e) => {
-      if (e.target === musicModal) {
-        closeMusicModal();
-      }
-    });
+  if (musicArtistBackButton) {
+    musicArtistBackButton.addEventListener('click', showMusicArtistList);
   }
 
   if (musicPlayPauseButton && albumPlayer) {

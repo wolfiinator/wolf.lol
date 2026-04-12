@@ -448,64 +448,52 @@
             opacity: 1 !important;
         }
 
-        .music-player-open {
-            border: 1px solid rgba(255, 255, 255, 0.35);
-            background: rgba(255, 255, 255, 0.08);
-            color: #fff;
-            font-size: 12px;
-            border-radius: 999px;
-            padding: 4px 10px;
-            cursor: pointer;
-            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
-        }
-
-        .music-player-open:hover {
-            transform: translateY(-3px) scale(1.08);
-            border-color: rgba(255, 255, 255, 0.72);
-            background: rgba(255, 255, 255, 0.16);
-            box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 20px rgba(59, 130, 246, 0.35);
-        }
-
-        .music-modal {
-            position: fixed;
-            inset: 0;
-            display: block;
-            background: transparent;
-            z-index: 40;
-            padding: 0;
-            opacity: 0;
-            pointer-events: none;
-            transition: opacity 0.3s ease;
-        }
-
-        .music-modal.is-visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-
-        .music-modal-content {
-            position: absolute;
-            left: max(12px, calc(50% - 620px));
-            bottom: 14px;
-            width: min(420px, calc(100vw - 24px));
-            max-height: calc(100vh - 28px);
-            aspect-ratio: 1 / 1;
-            overflow-y: auto;
-            border-radius: 14px;
-            border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(0, 0, 0, 0.7);
-            padding: 16px;
+        .more-music-content {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            transform: translateY(110%);
-            transition: transform 0.36s ease-out;
-            backdrop-filter: blur(10px);
-            box-shadow: 0 0 28px rgba(37, 99, 235, 0.35);
+            gap: 14px;
         }
 
-        .music-modal.is-visible .music-modal-content {
-            transform: translateY(0);
+        .music-artist-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        .music-artist-card {
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            font-size: 13px;
+            text-transform: lowercase;
+            padding: 12px;
+            cursor: pointer;
+            transition: transform 0.28s ease, box-shadow 0.28s ease, border-color 0.28s ease;
+        }
+
+        .music-artist-card:hover {
+            transform: translateY(-2px);
+            border-color: rgba(255, 255, 255, 0.7);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+        }
+
+        .music-player-panel {
+            border: 1px solid rgba(255, 255, 255, 0.16);
+            border-radius: 14px;
+            background: radial-gradient(circle at 20% 0%, rgba(67, 56, 202, 0.35) 0%, rgba(4, 2, 26, 0.88) 45%, rgba(2, 2, 8, 0.95) 100%);
+            padding: 14px;
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            gap: 16px;
+            min-height: 355px;
+            box-shadow: 0 0 28px rgba(59, 130, 246, 0.16);
+        }
+
+        .music-panel-left {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
         }
 
         .music-modal-header {
@@ -518,17 +506,17 @@
             border: 1px solid rgba(255, 255, 255, 0.35);
             background: transparent;
             color: #fff;
-            font-size: 14px;
-            border-radius: 8px;
-            padding: 3px 8px;
+            font-size: 12px;
+            border-radius: 999px;
+            padding: 6px 12px;
             cursor: pointer;
         }
 
         .music-cover {
             width: 100%;
             aspect-ratio: 1 / 1;
-            object-fit: contain;
-            border-radius: 0;
+            object-fit: cover;
+            border-radius: 8px;
             border: 1px solid rgba(255, 255, 255, 0.15);
             transition: filter 0.25s ease;
             background: rgba(0, 0, 0, 0.28);
@@ -542,6 +530,7 @@
             display: flex;
             flex-direction: column;
             gap: 10px;
+            align-self: start;
         }
 
         .music-artist {
@@ -582,6 +571,11 @@
         .music-track-button.active {
             border-color: rgba(255, 255, 255, 0.65);
             background: rgba(255, 255, 255, 0.16);
+        }
+
+        #music-now-playing {
+            color: rgba(255, 255, 255, 0.85);
+            font-size: 13px;
         }
 
         .music-controls {
@@ -738,16 +732,13 @@
             border-color: rgba(255, 255, 255, 0.8);
         }
 
-        .more-music-content {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 12px;
-        }
-
         .more-music-content p {
             font-size: 12px;
             color: rgba(255, 255, 255, 0.85);
+        }
+
+        .more-view {
+            opacity: 1;
         }
 
         .interest-list {
@@ -990,12 +981,13 @@
                 transform: translate(-50%, -50%);
             }
 
-            .music-modal-content {
-                left: 12px;
-                right: 12px;
-                width: auto;
-                max-width: calc(100vw - 24px);
-                aspect-ratio: 1 / 1;
+            .music-player-panel {
+                grid-template-columns: 1fr;
+                min-height: 0;
+            }
+
+            .music-panel-left {
+                max-width: 100%;
             }
 
             .profile-header {
@@ -1273,8 +1265,34 @@
                 <button id="more-music-back" class="subview-back" type="button">Back</button>
                 <h2 class="skills-title">Music Player</h2>
                 <div class="more-music-content">
-                    <p>Open the player to browse and listen.</p>
-                    <button id="open-music-player" class="music-player-open" type="button">Open Music Player</button>
+                    <div id="music-artist-select-view">
+                        <p>Select an artist to open their player.</p>
+                        <div id="music-artist-list" class="music-artist-list"></div>
+                    </div>
+                    <div id="music-artist-player-view" class="hidden">
+                        <button id="music-artist-back" class="music-close" type="button">Back to Artists</button>
+                        <div class="music-player-panel">
+                            <div class="music-panel-left">
+                                <img id="music-cover" class="music-cover" src="assets/profile.gif" alt="Album cover">
+                                <div id="music-now-playing">No track selected</div>
+                                <div class="music-controls">
+                                    <button id="music-prev" type="button">Prev</button>
+                                    <button id="music-play-pause" type="button">Play</button>
+                                    <button id="music-next" type="button">Next</button>
+                                    <button id="music-loop" type="button">Loop: off</button>
+                                </div>
+                            </div>
+                            <div>
+                                <div class="music-modal-header">
+                                    <h3 id="music-artist-heading">Music Player</h3>
+                                    <div id="music-equalizer" class="music-equalizer" aria-hidden="true">
+                                        <span></span><span></span><span></span><span></span><span></span>
+                                    </div>
+                                </div>
+                                <div id="music-list" class="music-list"></div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
             <div id="more-interests-view" class="more-view hidden">
@@ -1318,28 +1336,6 @@
             </div>
         </div>
     </div>
-
-    <div id="music-modal" class="music-modal hidden" aria-hidden="true">
-        <div class="music-modal-content">
-            <div class="music-modal-header">
-                <h3>Music Player</h3>
-                <div id="music-equalizer" class="music-equalizer" aria-hidden="true">
-                    <span></span><span></span><span></span><span></span><span></span>
-                </div>
-                <button id="music-close" class="music-close" type="button">Close</button>
-            </div>
-            <img id="music-cover" class="music-cover" src="assets/profile.gif" alt="Album cover">
-            <div id="music-now-playing">No track selected</div>
-            <div id="music-list" class="music-list"></div>
-            <div class="music-controls">
-                <button id="music-prev" type="button">Prev</button>
-                <button id="music-play-pause" type="button">Play</button>
-                <button id="music-next" type="button">Next</button>
-                <button id="music-loop" type="button">Loop: off</button>
-            </div>
-        </div>
-    </div>
-
 
     <script id="music-manifest" type="application/json">
         {
