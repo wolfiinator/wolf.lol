@@ -12,23 +12,6 @@
             font-family: 'Minecraftia', monospace;
         }
 
-        
-        .custom-cursor {
-            position: fixed;
-            width: 40px;
-            height: 40px;
-            background: url('assets/custom_cursor.png') no-repeat center center;
-            background-size: contain;
-            pointer-events: none;
-            z-index: 9999;
-            transform: translate(-50%, -50%);
-        }
-
-        
-        body:not(.touch-device) {
-            cursor: none;
-        }
-
         body {
             background-color: #000;
             color: #fff;
@@ -200,8 +183,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 820px;
-            min-height: 332px;
+            width: min(820px, calc(100vw - 32px));
+            min-height: min(332px, calc(100vh - 32px));
+            max-height: calc(100vh - 32px);
             background: rgba(0, 0, 0, 0.7);
             border: none;
             padding: 20px;
@@ -210,6 +194,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            overflow: auto;
             backdrop-filter: blur(10px);
             opacity: 0;
             transform-style: preserve-3d;
@@ -554,50 +539,7 @@
             margin-bottom: 10px;
         }
 
-        .discord-presence {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .discord-avatar-wrap {
-            position: relative;
-            width: 44px;
-            height: 44px;
-            flex: 0 0 auto;
-        }
-
-        .discord-avatar {
-            width: 100%;
-            height: 100%;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 1px solid rgba(255, 255, 255, 0.25);
-        }
-
-        .discord-indicator {
-            position: absolute;
-            right: 0;
-            bottom: 0;
-            width: 12px;
-            height: 12px;
-            border-radius: 50%;
-            border: 2px solid rgba(0, 0, 0, 0.8);
-            background: #747f8d;
-        }
-
-        .discord-indicator.online { background: #23a55a; }
-        .discord-indicator.idle { background: #f0b232; }
-        .discord-indicator.dnd { background: #f23f43; }
-        .discord-indicator.offline { background: #747f8d; }
-
-        .discord-main-line {
-            font-size: 14px;
-            color: rgba(255, 255, 255, 0.95);
-        }
-
-        .discord-sub-line,
-        .discord-music-line {
+        .status-line {
             margin-top: 3px;
             font-size: 12px;
             color: rgba(255, 255, 255, 0.68);
@@ -904,8 +846,9 @@
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
-            width: 820px;
-            min-height: 332px;
+            width: min(820px, calc(100vw - 32px));
+            min-height: min(332px, calc(100vh - 32px));
+            max-height: calc(100vh - 32px);
             background: rgba(0, 0, 0, 0.7);
             border: none;
             padding: 20px;
@@ -914,6 +857,7 @@
             display: flex;
             flex-direction: column;
             gap: 15px;
+            overflow: auto;
             backdrop-filter: blur(10px);
             transform-style: preserve-3d;
             transition: transform 0.5s ease-out;
@@ -1425,10 +1369,6 @@
     <link href="https://fonts.cdnfonts.com/css/minecraftia" rel="stylesheet">
 </head>
 <body class="home-theme" onload="initMedia()">
-    
-    <div class="custom-cursor"></div>
-
-    
     <div id="start-screen">
         <div id="start-text"></div>
     </div>
@@ -1493,21 +1433,8 @@
 
             <div class="profile-meta-grid">
                 <section class="meta-block">
-                    <h3 class="meta-title">Discord Status</h3>
-                    <div class="discord-presence" id="discord-presence" data-discord-id="222604250667155456">
-                        <div class="discord-avatar-wrap">
-                            <img id="discord-avatar" class="discord-avatar" src="assets/profile.gif" alt="Discord profile avatar">
-                            <span id="discord-indicator" class="discord-indicator offline" aria-hidden="true"></span>
-                        </div>
-                        <div>
-                            <div id="discord-main" class="discord-main-line">Discord presence unavailable</div>
-                            <div id="discord-sub" class="discord-sub-line">Set your Discord user ID in index.html</div>
-                        </div>
-                    </div>
-                </section>
-                <section class="meta-block">
-                    <h3 class="meta-title">Music</h3>
-                    <div id="discord-music" class="discord-music-line">Not listening to anything right now.</div>
+                    <h3 class="meta-title">Status</h3>
+                    <div class="status-line">Discord status removed.</div>
                 </section>
             </div>
 

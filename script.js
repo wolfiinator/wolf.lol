@@ -66,12 +66,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   const musicLoopButton = document.getElementById('music-loop');
   const musicEqualizer = document.getElementById('music-equalizer');
   const profileClock = document.getElementById('profile-clock');
-  const discordPresenceNode = document.getElementById('discord-presence');
-  const discordAvatarNode = document.getElementById('discord-avatar');
-  const discordIndicatorNode = document.getElementById('discord-indicator');
-  const discordMainNode = document.getElementById('discord-main');
-  const discordSubNode = document.getElementById('discord-sub');
-  const discordMusicNode = document.getElementById('discord-music');
   const volumeIcon = document.getElementById('volume-icon');
   const volumeSlider = document.getElementById('volume-slider');
   const transparencySlider = document.getElementById('transparency-slider');
@@ -278,47 +272,6 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeArtistIndex = -1;
 
 
-  const cursor = document.querySelector('.custom-cursor');
-  const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
-
-  if (isTouchDevice) {
-    document.body.classList.add('touch-device');
-    
-    document.addEventListener('touchstart', (e) => {
-      const touch = e.touches[0];
-      cursor.style.left = touch.clientX + 'px';
-      cursor.style.top = touch.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('touchmove', (e) => {
-      const touch = e.touches[0];
-      cursor.style.left = touch.clientX + 'px';
-      cursor.style.top = touch.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('touchend', () => {
-      cursor.style.display = 'none'; 
-    });
-  } else {
-
-    document.addEventListener('mousemove', (e) => {
-      cursor.style.left = e.clientX + 'px';
-      cursor.style.top = e.clientY + 'px';
-      cursor.style.display = 'block';
-    });
-
-    document.addEventListener('mousedown', () => {
-      cursor.style.transform = 'scale(0.8) translate(-50%, -50%)';
-    });
-
-    document.addEventListener('mouseup', () => {
-      cursor.style.transform = 'scale(1) translate(-50%, -50%)';
-    });
-  }
-
-
   const startMessage = "wolf.lol";
   let startTextContent = '';
   let startIndex = 0;
@@ -380,111 +333,6 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   updateProfileClock();
   setInterval(updateProfileClock, 1000);
-
-  function setDiscordStatusCopy({
-    main = 'Discord presence unavailable',
-    sub = 'Unable to load Discord status.',
-    music = 'Not listening to anything right now.',
-    avatar = 'assets/profile.gif',
-    indicator = 'offline'
-  } = {}) {
-    if (discordMainNode) {
-      discordMainNode.textContent = main;
-    }
-    if (discordSubNode) {
-      discordSubNode.textContent = sub;
-    }
-    if (discordMusicNode) {
-      discordMusicNode.textContent = music;
-    }
-    if (discordAvatarNode) {
-      discordAvatarNode.src = avatar;
-    }
-    if (discordIndicatorNode) {
-      discordIndicatorNode.classList.remove('online', 'idle', 'dnd', 'offline');
-      discordIndicatorNode.classList.add(indicator);
-    }
-  }
-
-  function getDiscordAvatarUrl(discordUser) {
-    if (!discordUser?.id) {
-      return 'assets/profile.gif';
-    }
-    if (discordUser.avatar) {
-      return `https://cdn.discordapp.com/avatars/${discordUser.id}/${discordUser.avatar}.png?size=128`;
-    }
-    const fallbackIndex = Number.isFinite(Number(discordUser.discriminator)) ? Number(discordUser.discriminator) % 5 : 0;
-    return `https://cdn.discordapp.com/embed/avatars/${fallbackIndex}.png`;
-  }
-
-  function getDiscordDisplayName(discordUser) {
-    if (!discordUser) return 'Discord user';
-    return discordUser.display_name || discordUser.global_name || discordUser.username || 'Discord user';
-  }
-
-  function formatDiscordStatus(status) {
-    if (status === 'dnd') return 'Do Not Disturb';
-    if (status === 'idle') return 'Idle';
-    if (status === 'online') return 'Online';
-    return 'Offline';
-  }
-
-  function formatSpotifyTrack(spotify) {
-    if (!spotify?.song || !spotify?.artist) {
-      return 'Not listening to anything right now.';
-    }
-    return `Listening to: ${spotify.song} — ${spotify.artist}`;
-  }
-
-  async function refreshDiscordPresence() {
-    if (!discordPresenceNode) {
-      return;
-    }
-
-    const discordId = discordPresenceNode.dataset.discordId;
-    if (!discordId || discordId === 'YOUR_DISCORD_USER_ID') {
-      setDiscordStatusCopy({
-        sub: 'Set your Discord user ID in index.html to enable this.',
-        music: 'Waiting for Discord ID...'
-      });
-      return;
-    }
-
-    try {
-      const response = await fetch(`https://api.lanyard.rest/v1/users/${discordId}`, { cache: 'no-store' });
-      if (!response.ok) {
-        throw new Error(`Lanyard API failed with ${response.status}`);
-      }
-
-      const payload = await response.json();
-      const presence = payload?.data;
-      if (!presence) {
-        throw new Error('No presence data returned');
-      }
-
-      const displayName = getDiscordDisplayName(presence.discord_user);
-      const statusLabel = formatDiscordStatus(presence.discord_status);
-      const avatarUrl = getDiscordAvatarUrl(presence.discord_user);
-      const customStatus = (presence.activities || []).find((activity) => activity.type === 4)?.state;
-
-      setDiscordStatusCopy({
-        main: displayName,
-        sub: customStatus ? `${statusLabel} • ${customStatus}` : statusLabel,
-        music: formatSpotifyTrack(presence.spotify),
-        avatar: avatarUrl,
-        indicator: ['online', 'idle', 'dnd'].includes(presence.discord_status) ? presence.discord_status : 'offline'
-      });
-    } catch (error) {
-      console.error('Failed to refresh Discord presence:', error);
-      setDiscordStatusCopy({
-        sub: 'Could not reach Discord presence API.',
-        music: 'Not listening to anything right now.'
-      });
-    }
-  }
-
-  refreshDiscordPresence();
-  setInterval(refreshDiscordPresence, 15000);
 
   function refreshPlayPauseButton() {
     if (!musicPlayPauseButton || !albumPlayer) return;
