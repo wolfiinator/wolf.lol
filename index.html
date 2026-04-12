@@ -503,30 +503,58 @@
         .interest-list {
             display: flex;
             flex-direction: column;
-            gap: 12px;
-            max-height: 420px;
-            overflow-y: auto;
-            padding-right: 6px;
+            gap: 14px;
+        }
+
+        .interest-tabs {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 8px;
+            justify-content: center;
+        }
+
+        .interest-tab {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.22);
+            color: rgba(255, 255, 255, 0.9);
+            border-radius: 999px;
+            padding: 6px 12px;
+            font-family: 'Minecraftia', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .interest-tab.active {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.8);
+            color: #fff;
         }
 
         .interest-item {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-            padding: 8px;
+            gap: 18px;
+            padding: 10px;
             border-radius: 12px;
             background: rgba(255, 255, 255, 0.05);
+            align-items: flex-start;
         }
 
         .interest-item img {
-            width: 100%;
+            width: 260px;
             border-radius: 10px;
             object-fit: cover;
             max-height: 360px;
+            flex-shrink: 0;
         }
 
-        .interest-item span {
+        .interest-copy h3 {
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .interest-copy p {
             font-size: 13px;
+            line-height: 1.6;
             color: rgba(255, 255, 255, 0.9);
         }
 
@@ -785,6 +813,15 @@
                 grid-template-columns: 1fr;
             }
 
+            .interest-item {
+                flex-direction: column;
+                align-items: stretch;
+            }
+
+            .interest-item img {
+                width: 100%;
+            }
+
             .skill-icon {
                 width: 18px;
                 height: 18px;
@@ -948,19 +985,20 @@
             <div class="card-action">
                 <button class="results-toggle">Back to Profile</button>
             </div>
-            <h2 class="skills-title">Interests</h2>
+            <h2 class="skills-title">Interests - Movies/Shows</h2>
             <div class="interest-list">
-                <div class="interest-item">
-                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/438100/library_600x900_2x.jpg" alt="VRChat interest image">
-                    <span>VRChat</span>
+                <div class="interest-tabs" role="tablist" aria-label="Movie and show interests">
+                    <button class="interest-tab active" data-interest="beastars" role="tab" aria-selected="true">Beastars</button>
+                    <button class="interest-tab" data-interest="fantastic-mr-fox" role="tab" aria-selected="false">Fantastic Mr. Fox</button>
+                    <button class="interest-tab" data-interest="the-bad-guys-1" role="tab" aria-selected="false">The Bad Guys (1)</button>
+                    <button class="interest-tab" data-interest="the-bad-guys-2" role="tab" aria-selected="false">The Bad Guys (2)</button>
                 </div>
                 <div class="interest-item">
-                    <img src="https://shared.fastly.steamstatic.com/store_item_assets/steam/apps/285900/library_600x900_2x.jpg" alt="Gang Beasts interest image">
-                    <span>Gang Beasts</span>
-                </div>
-                <div class="interest-item">
-                    <img src="https://www.impawards.com/2009/posters/fantastic_mr_fox_ver3.jpg" alt="Fantastic Mr. Fox interest image">
-                    <span>Fantastic Mr. Fox</span>
+                    <img id="interest-image" src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg" alt="Beastars poster art">
+                    <div class="interest-copy">
+                        <h3 id="interest-name">Beastars</h3>
+                        <p id="interest-description">In this anthropomorphic world, gentle wolf Legoshi struggles with instinct, identity, and love after a classmate's murder deepens the divide between carnivores and herbivores at Cherryton Academy.</p>
+                    </div>
                 </div>
             </div>
         </div>

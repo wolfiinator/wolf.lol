@@ -59,6 +59,37 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileContainer = document.querySelector('.profile-container');
   const socialIcons = document.querySelectorAll('.social-icon');
   const badges = document.querySelectorAll('.badge');
+  const interestTabs = document.querySelectorAll('.interest-tab');
+  const interestImage = document.getElementById('interest-image');
+  const interestName = document.getElementById('interest-name');
+  const interestDescription = document.getElementById('interest-description');
+
+  const interestsContent = {
+    beastars: {
+      name: 'Beastars',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg',
+      alt: 'Beastars volume cover art',
+      description: "In this anthropomorphic world, gentle wolf Legoshi struggles with instinct, identity, and love after a classmate's murder deepens the divide between carnivores and herbivores at Cherryton Academy."
+    },
+    'fantastic-mr-fox': {
+      name: 'Fantastic Mr. Fox',
+      image: 'https://upload.wikimedia.org/wikipedia/en/a/af/Fantastic_mr_fox.jpg',
+      alt: 'Fantastic Mr. Fox theatrical poster',
+      description: 'A clever fox returns to stealing from three ruthless farmers, pulling his family and entire animal community into a stylish, hilarious underground survival heist.'
+    },
+    'the-bad-guys-1': {
+      name: 'The Bad Guys (2022)',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/00/The_Bad_Guys_poster.jpeg/250px-The_Bad_Guys_poster.jpeg',
+      alt: 'The Bad Guys 2022 poster',
+      description: 'After years of high-profile crimes, a notorious animal crew is forced into a good-behavior experiment that starts as a con but slowly becomes a real shot at redemption.'
+    },
+    'the-bad-guys-2': {
+      name: 'The Bad Guys 2 (2025)',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/The_Bad_Guys_2_%282025%29_teaser_poster.jpg/250px-The_Bad_Guys_2_%282025%29_teaser_poster.jpg',
+      alt: 'The Bad Guys 2 teaser poster',
+      description: 'The reformed crew gets pulled back into the action when a new all-female criminal team forces them into one more globe-trotting heist.'
+    }
+  };
 
   
   const cursor = document.querySelector('.custom-cursor');
@@ -651,6 +682,32 @@ document.addEventListener('DOMContentLoaded', () => {
       toggleResultsView();
     });
   });
+
+  function updateInterestTab(interestKey) {
+    const interest = interestsContent[interestKey];
+    if (!interest || !interestImage || !interestName || !interestDescription) return;
+
+    interestImage.src = interest.image;
+    interestImage.alt = interest.alt;
+    interestName.textContent = interest.name;
+    interestDescription.textContent = interest.description;
+
+    interestTabs.forEach((tab) => {
+      const isActive = tab.dataset.interest === interestKey;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', String(isActive));
+    });
+  }
+
+  interestTabs.forEach((tab) => {
+    tab.addEventListener('click', () => updateInterestTab(tab.dataset.interest));
+    tab.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      updateInterestTab(tab.dataset.interest);
+    });
+  });
+
+  updateInterestTab('beastars');
 
 
   typeWriterStart();
