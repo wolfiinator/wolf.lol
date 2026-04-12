@@ -25,7 +25,6 @@ function initMedia() {
   
   backgroundVideo.play().catch(err => {
     console.error("Failed to play background video:", err);
-    applyVideoFallback();
   });
 }
 
@@ -455,35 +454,35 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   hackerButton.addEventListener('click', () => {
-    switchTheme('assets/hacker_background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
+    switchTheme('assets/background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
   });
   hackerButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/hacker_background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
+    switchTheme('assets/background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
   });
 
   rainButton.addEventListener('click', () => {
-    switchTheme('assets/rain_background.mov', rainMusic, 'rain-theme', snowOverlay, true);
+    switchTheme('assets/background.mp4', rainMusic, 'rain-theme', snowOverlay, true);
   });
   rainButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/rain_background.mov', rainMusic, 'rain-theme', snowOverlay, true);
+    switchTheme('assets/background.mp4', rainMusic, 'rain-theme', snowOverlay, true);
   });
 
   animeButton.addEventListener('click', () => {
-    switchTheme('assets/anime_background.mp4', animeMusic, 'anime-theme');
+    switchTheme('assets/background.mp4', animeMusic, 'anime-theme');
   });
   animeButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/anime_background.mp4', animeMusic, 'anime-theme');
+    switchTheme('assets/background.mp4', animeMusic, 'anime-theme');
   });
 
   carButton.addEventListener('click', () => {
-    switchTheme('assets/car_background.mp4', carMusic, 'car-theme');
+    switchTheme('assets/background.mp4', carMusic, 'car-theme');
   });
   carButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/car_background.mp4', carMusic, 'car-theme');
+    switchTheme('assets/background.mp4', carMusic, 'car-theme');
   });
 
  
