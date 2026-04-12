@@ -38,6 +38,32 @@
       ]
     },
     {
+      "name": "osquinn",
+      "folder": "music/osquinn",
+      "tracks": [
+        {
+          "file": "fml/fml.mp3",
+          "title": "fml",
+          "cover": "fml/https___images.genius.com_6a9a432b3402834ff504f8c9a760e8a4.1000x1000x1.png"
+        },
+        {
+          "file": "mbn/must be nice.mp3",
+          "title": "must be nice",
+          "cover": "mbn/https___images.genius.com_fd5d3872a13c89ae953218f6cedf17b1.1000x1000x1.png"
+        },
+        {
+          "file": "never again/never again.mp3",
+          "title": "never again",
+          "cover": "never again/Screenshot 2026-04-12 044052.png"
+        },
+        {
+          "file": "ok im cool/ok im cool.mp3",
+          "title": "ok im cool",
+          "cover": "ok im cool/https___images.genius.com_f0006d77425e64503cf0d058b826a7f7.1000x1000x1.png"
+        }
+      ]
+    },
+    {
       "name": "sombr",
       "folder": "music/sombr",
       "tracks": [
