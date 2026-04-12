@@ -681,8 +681,17 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   const LEGACY_PROFILE_NAME = 'wolf.';
-  const LEGACY_PROFILE_BIOS = ['the best oat.', 'love yall.'];
+  const LEGACY_PROFILE_BIOS = ['love yall.', 'the best oat.'];
   let hasStartedLegacyTypingAnimations = false;
+  let nameText = '';
+  let nameIndex = 0;
+  let isNameDeleting = false;
+  let nameCursorVisible = true;
+  let bioText = '';
+  let bioIndex = 0;
+  let bioMessageIndex = 0;
+  let isBioDeleting = false;
+  let bioCursorVisible = true;
 
   function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
@@ -699,45 +708,70 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   async function typeWriterName() {
     profileName.classList.add('typing-active');
+    while (hasStartedLegacyTypingAnimations) {
+      if (!isNameDeleting && nameIndex < LEGACY_PROFILE_NAME.length) {
+        nameText = LEGACY_PROFILE_NAME.slice(0, nameIndex + 1);
+        nameIndex += 1;
+      } else if (isNameDeleting && nameIndex > 0) {
+        nameText = LEGACY_PROFILE_NAME.slice(0, nameIndex - 1);
+        nameIndex -= 1;
+      } else if (nameIndex === LEGACY_PROFILE_NAME.length) {
+        isNameDeleting = true;
+        await delay(10000);
+        continue;
+      } else if (nameIndex === 0) {
+        isNameDeleting = false;
+      }
 
-    while (true) {
-      for (let i = 1; i <= LEGACY_PROFILE_NAME.length; i += 1) {
-        profileName.textContent = `${LEGACY_PROFILE_NAME.slice(0, i)}|`;
-        await delay(95);
+      profileName.textContent = `${nameText}${nameCursorVisible ? '|' : ' '}`;
+      if (Math.random() < 0.1) {
+        profileName.classList.add('glitch');
+        setTimeout(() => profileName.classList.remove('glitch'), 200);
       }
-      await delay(900);
-      for (let i = LEGACY_PROFILE_NAME.length - 1; i >= 0; i -= 1) {
-        profileName.textContent = `${LEGACY_PROFILE_NAME.slice(0, i)}|`;
-        await delay(75);
-      }
-      await delay(250);
+      await delay(isNameDeleting ? 150 : 300);
     }
   }
 
 
   async function typeWriterBio() {
-    let activeBioIndex = 0;
     profileBio.classList.add('typing-active');
+    while (hasStartedLegacyTypingAnimations) {
+      const currentBio = LEGACY_PROFILE_BIOS[bioMessageIndex];
+      if (!isBioDeleting && bioIndex < currentBio.length) {
+        bioText = currentBio.slice(0, bioIndex + 1);
+        bioIndex += 1;
+      } else if (isBioDeleting && bioIndex > 0) {
+        bioText = currentBio.slice(0, bioIndex - 1);
+        bioIndex -= 1;
+      } else if (bioIndex === currentBio.length) {
+        isBioDeleting = true;
+        await delay(2000);
+        continue;
+      } else if (bioIndex === 0 && isBioDeleting) {
+        isBioDeleting = false;
+        bioMessageIndex = (bioMessageIndex + 1) % LEGACY_PROFILE_BIOS.length;
+      }
 
-    while (true) {
-      const currentBio = LEGACY_PROFILE_BIOS[activeBioIndex];
-      for (let i = 1; i <= currentBio.length; i += 1) {
-        profileBio.textContent = `${currentBio.slice(0, i)}|`;
-        await delay(60);
+      profileBio.textContent = `${bioText}${bioCursorVisible ? '|' : ' '}`;
+      if (Math.random() < 0.1) {
+        profileBio.classList.add('glitch');
+        setTimeout(() => profileBio.classList.remove('glitch'), 200);
       }
-      profileBio.textContent = currentBio;
-      await delay(1300);
-      profileBio.classList.add('is-swapping');
-      await delay(220);
-      for (let i = currentBio.length - 1; i >= 0; i -= 1) {
-        profileBio.textContent = `${currentBio.slice(0, i)}|`;
-        await delay(35);
-      }
-      profileBio.classList.remove('is-swapping');
-      activeBioIndex = (activeBioIndex + 1) % LEGACY_PROFILE_BIOS.length;
-      await delay(150);
+      await delay(isBioDeleting ? 75 : 150);
     }
   }
+
+  setInterval(() => {
+    nameCursorVisible = !nameCursorVisible;
+    if (!hasStartedLegacyTypingAnimations) return;
+    profileName.textContent = `${nameText}${nameCursorVisible ? '|' : ' '}`;
+  }, 500);
+
+  setInterval(() => {
+    bioCursorVisible = !bioCursorVisible;
+    if (!hasStartedLegacyTypingAnimations) return;
+    profileBio.textContent = `${bioText}${bioCursorVisible ? '|' : ' '}`;
+  }, 500);
 
 
   let currentAudio = musicPlayer;
@@ -935,19 +969,13 @@ document.addEventListener('DOMContentLoaded', async () => {
   setInterval(cycleTheme, 18000);
 
  
-  function handleTilt(e, element) {
+  function handleTilt(pointer, element) {
     const rect = element.getBoundingClientRect();
+    if (!rect.width || !rect.height) return;
     const centerX = rect.left + rect.width / 2;
     const centerY = rect.top + rect.height / 2;
-    let clientX, clientY;
-
-    if (e.type === 'touchmove') {
-      clientX = e.touches[0].clientX;
-      clientY = e.touches[0].clientY;
-    } else {
-      clientX = e.clientX;
-      clientY = e.clientY;
-    }
+    const { clientX, clientY } = pointer;
+    if (!Number.isFinite(clientX) || !Number.isFinite(clientY)) return;
 
     const mouseX = clientX - centerX;
     const mouseY = clientY - centerY;
@@ -966,19 +994,32 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   const tiltState = {
-    profile: { scheduled: false, event: null },
-    skills: { scheduled: false, event: null }
+    profile: { scheduled: false, pointer: null },
+    skills: { scheduled: false, pointer: null }
   };
+
+  function getPointerFromEvent(e) {
+    if (e.touches?.length) {
+      return {
+        clientX: e.touches[0].clientX,
+        clientY: e.touches[0].clientY
+      };
+    }
+    return {
+      clientX: e.clientX,
+      clientY: e.clientY
+    };
+  }
 
   function scheduleTilt(stateKey, e, element) {
     const state = tiltState[stateKey];
-    state.event = e;
+    state.pointer = getPointerFromEvent(e);
     if (state.scheduled || prefersReducedMotion || isCoarsePointer || isMinimalistModeEnabled) return;
     state.scheduled = true;
     requestAnimationFrame(() => {
       state.scheduled = false;
-      if (state.event) {
-        handleTilt(state.event, element);
+      if (state.pointer) {
+        handleTilt(state.pointer, element);
       }
     });
   }
