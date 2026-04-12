@@ -407,6 +407,7 @@
         .visitor-counter {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
             background: rgba(255, 255, 255, 0.1);
             padding: 8px 15px;
@@ -449,6 +450,112 @@
 
         #visitor-count {
             opacity: 1 !important;
+        }
+
+        .music-player-open {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 12px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .music-player-open:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .music-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.66);
+            z-index: 40;
+            padding: 16px;
+        }
+
+        .music-modal-content {
+            width: min(520px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(10, 10, 18, 0.95);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .music-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .music-close {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 8px;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .music-cover {
+            width: 100%;
+            max-height: 240px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .music-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .music-artist {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .music-track-button {
+            width: 100%;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+        }
+
+        .music-track-button.active {
+            border-color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .music-controls button {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
         }
 
         .social-links {
@@ -975,6 +1082,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     <span id="visitor-count">7,922</span>
+                    <button id="open-music-player" class="music-player-open" type="button">music player</button>
                     <span class="tooltip">Profile Views</span>
                 </div>
             </div>
@@ -1030,6 +1138,24 @@
         </div>
     </div>
 
+    <div id="music-modal" class="music-modal hidden" aria-hidden="true">
+        <div class="music-modal-content">
+            <div class="music-modal-header">
+                <h3>Music Player</h3>
+                <button id="music-close" class="music-close" type="button">Close</button>
+            </div>
+            <img id="music-cover" class="music-cover" src="assets/profile.gif" alt="Album cover">
+            <div id="music-now-playing">No track selected</div>
+            <div id="music-list" class="music-list"></div>
+            <div class="music-controls">
+                <button id="music-prev" type="button">Prev</button>
+                <button id="music-play-pause" type="button">Play</button>
+                <button id="music-next" type="button">Next</button>
+                <button id="music-loop" type="button">Loop: off</button>
+            </div>
+        </div>
+    </div>
+
 
     <script id="music-manifest" type="application/json">
         {
@@ -1043,7 +1169,20 @@
             ]
         }
     </script>
+    <script id="custom-player-manifest" type="application/json">
+        {
+            "artists": [
+                {
+                    "name": "sombr",
+                    "folder": "music/sombr",
+                    "cover": "maxresdefault (1).jpg",
+                    "tracks": ["would've been you.mp3"]
+                }
+            ]
+        }
+    </script>
     <audio id="music-player" loop preload="metadata"></audio>
+    <audio id="album-player" preload="metadata"></audio>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
