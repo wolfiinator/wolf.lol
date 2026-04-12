@@ -5,6 +5,11 @@
       "folder": "music/aimware, novoline, kxrrvpt",
       "tracks": [
         {
+          "file": "dot/..mp3",
+          "title": "",
+          "cover": "dot/Screenshot 2026-04-12 043259.png"
+        },
+        {
           "file": "someday/someday..mp3",
           "title": "someday",
           "cover": "someday/Screenshot 2026-04-12 043259.png"
