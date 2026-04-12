@@ -10,10 +10,21 @@ function initMedia() {
   }
   backgroundMusic.volume = 0.3;
   backgroundVideo.muted = true; 
+  backgroundVideo.loop = true;
+
+  const applyVideoFallback = () => {
+    document.body.classList.add('video-fallback');
+  };
+  backgroundVideo.addEventListener('error', applyVideoFallback);
+  const backgroundSource = backgroundVideo.querySelector('source');
+  if (backgroundSource) {
+    backgroundSource.addEventListener('error', applyVideoFallback);
+  }
 
   
   backgroundVideo.play().catch(err => {
     console.error("Failed to play background video:", err);
+    applyVideoFallback();
   });
 }
 
