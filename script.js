@@ -45,6 +45,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const moreHomeView = document.getElementById('more-home-view');
   const moreMusicView = document.getElementById('more-music-view');
   const moreInterestsView = document.getElementById('more-interests-view');
+  const moreInterestsCharactersView = document.getElementById('more-interests-characters-view');
   const musicArtistSelectView = document.getElementById('music-artist-select-view');
   const musicArtistPlayerView = document.getElementById('music-artist-player-view');
   const musicArtistListNode = document.getElementById('music-artist-list');
@@ -54,6 +55,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const openMoreInterestsButton = document.getElementById('open-more-interests');
   const moreMusicBackButton = document.getElementById('more-music-back');
   const moreInterestsBackButton = document.getElementById('more-interests-back');
+  const moreInterestsCharactersBackButton = document.getElementById('more-interests-characters-back');
+  const interestsNextButton = document.getElementById('interests-next-button');
   const musicListNode = document.getElementById('music-list');
   const musicNowPlayingNode = document.getElementById('music-now-playing');
   const musicCoverNode = document.getElementById('music-cover');
@@ -80,6 +83,10 @@ document.addEventListener('DOMContentLoaded', async () => {
   const interestImage = document.getElementById('interest-image');
   const interestName = document.getElementById('interest-name');
   const interestDescription = document.getElementById('interest-description');
+  const characterTabs = document.querySelectorAll('.character-tab');
+  const characterImage = document.getElementById('character-image');
+  const characterName = document.getElementById('character-name');
+  const characterDescription = document.getElementById('character-description');
   const minimizedHud = document.getElementById('minimized-hud');
   const minimizedName = document.getElementById('minimized-name');
   const minimizedViews = document.getElementById('minimized-views');
@@ -114,6 +121,27 @@ document.addEventListener('DOMContentLoaded', async () => {
       image: 'https://upload.wikimedia.org/wikipedia/en/thumb/b/b9/The_Bad_Guys_2_%282025%29_teaser_poster.jpg/250px-The_Bad_Guys_2_%282025%29_teaser_poster.jpg',
       alt: 'The Bad Guys 2 teaser poster',
       description: 'The reformed crew gets pulled back into the action when a new all-female criminal team forces them into one more globe-trotting heist.'
+    }
+  };
+
+  const characterInterestsContent = {
+    'mr-wolf': {
+      name: 'Mr. Wolf (The Bad Guys)',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/0/00/The_Bad_Guys_poster.jpeg/250px-The_Bad_Guys_poster.jpeg',
+      alt: 'The Bad Guys poster featuring Mr. Wolf',
+      description: 'A charismatic mastermind who starts as a legendary thief and gradually chooses loyalty and growth over reputation.'
+    },
+    legoshi: {
+      name: 'Legoshi (Beastars)',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg',
+      alt: 'Beastars cover art featuring Legoshi',
+      description: 'Quiet, observant, and conflicted, Legoshi fights to control his instincts while learning what strength and kindness look like together.'
+    },
+    jack: {
+      name: 'Jack (Beastars)',
+      image: 'https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg',
+      alt: 'Beastars cover art associated with Jack',
+      description: 'Legoshi’s close friend with loyal golden-retriever energy, balancing warmth and optimism in a world full of tension.'
     }
   };
 
@@ -1080,7 +1108,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       onComplete: () => {
         profileBlock.classList.add('hidden');
         skillsBlock.classList.remove('hidden');
-        [moreHomeView, moreMusicView, moreInterestsView].forEach((view) => view && view.classList.add('hidden'));
+        [moreHomeView, moreMusicView, moreInterestsView, moreInterestsCharactersView].forEach((view) => view && view.classList.add('hidden'));
         activeMoreSubview = null;
         showMoreSubview(moreHomeView);
         gsap.fromTo(skillsBlock,
@@ -1156,6 +1184,10 @@ document.addEventListener('DOMContentLoaded', async () => {
     moreInterestsBackButton.addEventListener('click', () => showMoreSubview(moreHomeView));
   }
 
+  if (moreInterestsCharactersBackButton) {
+    moreInterestsCharactersBackButton.addEventListener('click', () => showMoreSubview(moreInterestsView));
+  }
+
   function updateInterestTab(interestKey) {
     const interest = interestsContent[interestKey];
     if (!interest || !interestImage || !interestName || !interestDescription) return;
@@ -1188,6 +1220,44 @@ document.addEventListener('DOMContentLoaded', async () => {
       tab.classList.toggle('active', isActive);
       tab.setAttribute('aria-selected', String(isActive));
     });
+
+    if (interestsNextButton) {
+      interestsNextButton.classList.toggle('visible', interestKey === 'the-bad-guys-2');
+    }
+  }
+
+  function updateCharacterTab(characterKey) {
+    const character = characterInterestsContent[characterKey];
+    if (!character || !characterImage || !characterName || !characterDescription) return;
+    const applyCharacter = () => {
+      characterImage.src = character.image;
+      characterImage.alt = character.alt;
+      characterName.textContent = character.name;
+      characterDescription.textContent = character.description;
+      const interestItem = characterImage.closest('.interest-item');
+      if (interestItem) {
+        gsap.fromTo(interestItem, { autoAlpha: 0, y: 10 }, { autoAlpha: 1, y: 0, duration: 0.24, ease: 'power2.out' });
+      }
+    };
+
+    const interestItem = characterImage.closest('.interest-item');
+    if (interestItem) {
+      gsap.to(interestItem, {
+        autoAlpha: 0,
+        y: -6,
+        duration: 0.15,
+        ease: 'power2.in',
+        onComplete: applyCharacter
+      });
+    } else {
+      applyCharacter();
+    }
+
+    characterTabs.forEach((tab) => {
+      const isActive = tab.dataset.character === characterKey;
+      tab.classList.toggle('active', isActive);
+      tab.setAttribute('aria-selected', String(isActive));
+    });
   }
 
   interestTabs.forEach((tab) => {
@@ -1198,7 +1268,24 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   });
 
+  characterTabs.forEach((tab) => {
+    tab.addEventListener('click', () => updateCharacterTab(tab.dataset.character));
+    tab.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      updateCharacterTab(tab.dataset.character);
+    });
+  });
+
+  if (interestsNextButton) {
+    interestsNextButton.addEventListener('click', () => showMoreSubview(moreInterestsCharactersView));
+    interestsNextButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      showMoreSubview(moreInterestsCharactersView);
+    });
+  }
+
   updateInterestTab('beastars');
+  updateCharacterTab('mr-wolf');
   renderArtistList();
   showMusicArtistList();
   initializeSmoothClickFeedback();
