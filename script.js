@@ -263,13 +263,27 @@ document.addEventListener('DOMContentLoaded', () => {
   function openMusicModal() {
     if (!musicModal) return;
     musicModal.classList.remove('hidden');
+    requestAnimationFrame(() => {
+      musicModal.classList.add('is-visible');
+    });
+    if (profileBlock) {
+      profileBlock.classList.add('music-panel-open');
+    }
     musicModal.setAttribute('aria-hidden', 'false');
     updateMusicAnimations();
   }
 
   function closeMusicModal() {
     if (!musicModal) return;
-    musicModal.classList.add('hidden');
+    musicModal.classList.remove('is-visible');
+    if (profileBlock) {
+      profileBlock.classList.remove('music-panel-open');
+    }
+    window.setTimeout(() => {
+      if (!musicModal.classList.contains('is-visible')) {
+        musicModal.classList.add('hidden');
+      }
+    }, 360);
     musicModal.setAttribute('aria-hidden', 'true');
   }
 

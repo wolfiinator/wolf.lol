@@ -456,36 +456,56 @@
             border-radius: 999px;
             padding: 4px 10px;
             cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
         }
 
         .music-player-open:hover {
+            transform: translateY(-3px) scale(1.08);
+            border-color: rgba(255, 255, 255, 0.72);
             background: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 20px rgba(59, 130, 246, 0.35);
         }
 
         .music-modal {
             position: fixed;
             inset: 0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            background: rgba(0, 0, 0, 0.66);
+            display: block;
+            background: transparent;
             z-index: 40;
-            padding: 16px;
+            padding: 0;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+
+        .music-modal.is-visible {
+            opacity: 1;
+            pointer-events: auto;
         }
 
         .music-modal-content {
-            width: min(520px, 100%);
-            max-height: 90vh;
+            position: absolute;
+            left: max(12px, calc(50% - 620px));
+            bottom: 14px;
+            width: min(420px, calc(100vw - 24px));
+            max-height: calc(100vh - 28px);
+            aspect-ratio: 1 / 1;
             overflow-y: auto;
             border-radius: 14px;
             border: 1px solid rgba(255, 255, 255, 0.18);
-            background: rgba(10, 10, 18, 0.95);
+            background: rgba(0, 0, 0, 0.7);
             padding: 16px;
             display: flex;
             flex-direction: column;
             gap: 12px;
-            animation: music-modal-pop 0.35s ease-out;
+            transform: translateY(110%);
+            transition: transform 0.36s ease-out;
+            backdrop-filter: blur(10px);
             box-shadow: 0 0 28px rgba(37, 99, 235, 0.35);
+        }
+
+        .music-modal.is-visible .music-modal-content {
+            transform: translateY(0);
         }
 
         .music-modal-header {
@@ -506,16 +526,15 @@
 
         .music-cover {
             width: 100%;
-            max-height: 240px;
-            object-fit: cover;
-            border-radius: 10px;
+            aspect-ratio: 1 / 1;
+            object-fit: contain;
+            border-radius: 0;
             border: 1px solid rgba(255, 255, 255, 0.15);
-            transition: transform 0.25s ease, filter 0.25s ease;
-            transform-origin: center;
+            transition: filter 0.25s ease;
+            background: rgba(0, 0, 0, 0.28);
         }
 
         .music-cover.playing {
-            animation: cover-spin 8s linear infinite;
             filter: drop-shadow(0 0 12px rgba(37, 99, 235, 0.55));
         }
 
@@ -578,6 +597,14 @@
             border-radius: 8px;
             padding: 6px 10px;
             cursor: pointer;
+            transition: transform 0.25s ease, box-shadow 0.25s ease, border-color 0.25s ease, background 0.25s ease;
+        }
+
+        .music-controls button:hover {
+            transform: translateY(-3px) scale(1.05);
+            border-color: rgba(255, 255, 255, 0.72);
+            background: rgba(255, 255, 255, 0.16);
+            box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 20px rgba(59, 130, 246, 0.35);
         }
 
         .music-equalizer {
@@ -638,6 +665,10 @@
             transform: translateY(-3px) scale(1.08);
             border-color: rgba(255, 255, 255, 0.72);
             box-shadow: 0 0 14px rgba(255, 255, 255, 0.45), 0 0 20px rgba(59, 130, 246, 0.35);
+        }
+
+        #profile-block.music-panel-open {
+            transform: translate(calc(-50% + 230px), -50%);
         }
 
         .theme-loop-indicator {
@@ -837,11 +868,6 @@
             }
         }
 
-        @keyframes cover-spin {
-            from { transform: scale(1.01) rotate(0deg); }
-            to { transform: scale(1.01) rotate(360deg); }
-        }
-
         @keyframes eq-idle {
             0%, 100% { height: 6px; opacity: 0.45; }
             50% { height: 10px; opacity: 0.75; }
@@ -920,6 +946,18 @@
                 top: 50%;
                 left: 50%;
                 transform: translate(-50%, -50%);
+            }
+
+            #profile-block.music-panel-open {
+                transform: translate(-50%, -50%);
+            }
+
+            .music-modal-content {
+                left: 12px;
+                right: 12px;
+                width: auto;
+                max-width: calc(100vw - 24px);
+                aspect-ratio: 1 / 1;
             }
 
             .profile-header {
