@@ -712,6 +712,44 @@
             margin-bottom: 15px;
         }
 
+        .more-options {
+            display: flex;
+            justify-content: center;
+            gap: 12px;
+            flex-wrap: wrap;
+            margin-top: 6px;
+        }
+
+        .more-option,
+        .subview-back {
+            background: rgba(255, 255, 255, 0.08);
+            border: 1px solid rgba(255, 255, 255, 0.25);
+            color: #fff;
+            border-radius: 999px;
+            padding: 8px 14px;
+            font-family: 'Minecraftia', monospace;
+            font-size: 12px;
+            cursor: pointer;
+        }
+
+        .more-option:hover,
+        .subview-back:hover {
+            background: rgba(255, 255, 255, 0.2);
+            border-color: rgba(255, 255, 255, 0.8);
+        }
+
+        .more-music-content {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .more-music-content p {
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.85);
+        }
+
         .interest-list {
             display: flex;
             flex-direction: column;
@@ -1154,7 +1192,7 @@
 
         <div id="profile-block">
             <div class="card-action">
-                <button class="results-toggle">View Results</button>
+                <button id="open-more" class="results-toggle">More</button>
             </div>
             <div class="profile-header">
                 <div class="profile-container">
@@ -1214,7 +1252,6 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     <span id="visitor-count">192,729</span>
-                    <button id="open-music-player" class="music-player-open" type="button">music player</button>
                     <span class="tooltip">Profile Views</span>
                 </div>
             </div>
@@ -1223,21 +1260,39 @@
 
         <div id="skills-block" class="hidden">
             <div class="card-action">
-                <button class="results-toggle">Back to Profile</button>
+                <button id="close-more" class="results-toggle">Back to Profile</button>
             </div>
-            <h2 class="skills-title">Interests - Movies/Shows</h2>
-            <div class="interest-list">
-                <div class="interest-tabs" role="tablist" aria-label="Movie and show interests">
-                    <button class="interest-tab active" data-interest="beastars" role="tab" aria-selected="true">Beastars</button>
-                    <button class="interest-tab" data-interest="fantastic-mr-fox" role="tab" aria-selected="false">Fantastic Mr. Fox</button>
-                    <button class="interest-tab" data-interest="the-bad-guys-1" role="tab" aria-selected="false">The Bad Guys (1)</button>
-                    <button class="interest-tab" data-interest="the-bad-guys-2" role="tab" aria-selected="false">The Bad Guys (2)</button>
+            <div id="more-home-view" class="more-view">
+                <h2 class="skills-title">More</h2>
+                <div class="more-options">
+                    <button id="open-more-music" class="more-option" type="button">Music Player</button>
+                    <button id="open-more-interests" class="more-option" type="button">Interests</button>
                 </div>
-                <div class="interest-item">
-                    <img id="interest-image" src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg" alt="Beastars poster art">
-                    <div class="interest-copy">
-                        <h3 id="interest-name">Beastars</h3>
-                        <p id="interest-description">In this anthropomorphic world, gentle wolf Legoshi struggles with instinct, identity, and love after a classmate's murder deepens the divide between carnivores and herbivores at Cherryton Academy.</p>
+            </div>
+            <div id="more-music-view" class="more-view hidden">
+                <button id="more-music-back" class="subview-back" type="button">Back</button>
+                <h2 class="skills-title">Music Player</h2>
+                <div class="more-music-content">
+                    <p>Open the player to browse and listen.</p>
+                    <button id="open-music-player" class="music-player-open" type="button">Open Music Player</button>
+                </div>
+            </div>
+            <div id="more-interests-view" class="more-view hidden">
+                <button id="more-interests-back" class="subview-back" type="button">Back</button>
+                <h2 class="skills-title">Interests - Movies/Shows</h2>
+                <div class="interest-list">
+                    <div class="interest-tabs" role="tablist" aria-label="Movie and show interests">
+                        <button class="interest-tab active" data-interest="beastars" role="tab" aria-selected="true">Beastars</button>
+                        <button class="interest-tab" data-interest="fantastic-mr-fox" role="tab" aria-selected="false">Fantastic Mr. Fox</button>
+                        <button class="interest-tab" data-interest="the-bad-guys-1" role="tab" aria-selected="false">The Bad Guys (1)</button>
+                        <button class="interest-tab" data-interest="the-bad-guys-2" role="tab" aria-selected="false">The Bad Guys (2)</button>
+                    </div>
+                    <div class="interest-item">
+                        <img id="interest-image" src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg" alt="Beastars poster art">
+                        <div class="interest-copy">
+                            <h3 id="interest-name">Beastars</h3>
+                            <p id="interest-description">In this anthropomorphic world, gentle wolf Legoshi struggles with instinct, identity, and love after a classmate's murder deepens the divide between carnivores and herbivores at Cherryton Academy.</p>
+                        </div>
                     </div>
                 </div>
             </div>

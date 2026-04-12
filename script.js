@@ -39,6 +39,15 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicManifestNode = document.getElementById('music-manifest');
   const customPlayerManifestNode = document.getElementById('custom-player-manifest');
   const openMusicPlayerButton = document.getElementById('open-music-player');
+  const openMoreButton = document.getElementById('open-more');
+  const closeMoreButton = document.getElementById('close-more');
+  const moreHomeView = document.getElementById('more-home-view');
+  const moreMusicView = document.getElementById('more-music-view');
+  const moreInterestsView = document.getElementById('more-interests-view');
+  const openMoreMusicButton = document.getElementById('open-more-music');
+  const openMoreInterestsButton = document.getElementById('open-more-interests');
+  const moreMusicBackButton = document.getElementById('more-music-back');
+  const moreInterestsBackButton = document.getElementById('more-interests-back');
   const musicModal = document.getElementById('music-modal');
   const musicCloseButton = document.getElementById('music-close');
   const musicListNode = document.getElementById('music-list');
@@ -49,7 +58,6 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicNextButton = document.getElementById('music-next');
   const musicLoopButton = document.getElementById('music-loop');
   const musicEqualizer = document.getElementById('music-equalizer');
-  const resultsButtons = document.querySelectorAll('.results-toggle');
   const profileClock = document.getElementById('profile-clock');
   const volumeIcon = document.getElementById('volume-icon');
   const volumeSlider = document.getElementById('volume-slider');
@@ -811,61 +819,80 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
  
-  let isShowingSkills = false;
-
-  function setResultsButtonText() {
-    const label = isShowingSkills ? 'Back to Profile' : 'View Results';
-    resultsButtons.forEach((button) => {
-      button.textContent = label;
+  function showMoreSubview(targetView) {
+    [moreHomeView, moreMusicView, moreInterestsView].forEach((view) => {
+      if (!view) return;
+      view.classList.toggle('hidden', view !== targetView);
     });
   }
 
-  function toggleResultsView() {
-    if (!isShowingSkills) {
-      gsap.to(profileBlock, {
-        x: -100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          profileBlock.classList.add('hidden');
-          skillsBlock.classList.remove('hidden');
-          gsap.fromTo(skillsBlock,
-            { x: 100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-        }
-      });
-      isShowingSkills = true;
-    } else {
-      gsap.to(skillsBlock, {
-        x: 100,
-        opacity: 0,
-        duration: 0.5,
-        ease: 'power2.in',
-        onComplete: () => {
-          skillsBlock.classList.add('hidden');
-          profileBlock.classList.remove('hidden');
-          gsap.fromTo(profileBlock,
-            { x: -100, opacity: 0 },
-            { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
-          );
-        }
-      });
-      isShowingSkills = false;
-    }
-    setResultsButtonText();
+  function openMoreView() {
+    gsap.to(profileBlock, {
+      x: -100,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'power2.in',
+      onComplete: () => {
+        profileBlock.classList.add('hidden');
+        skillsBlock.classList.remove('hidden');
+        showMoreSubview(moreHomeView);
+        gsap.fromTo(skillsBlock,
+          { x: 100, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
+        );
+      }
+    });
   }
 
-  setResultsButtonText();
+  function closeMoreView() {
+    gsap.to(skillsBlock, {
+      x: 100,
+      opacity: 0,
+      duration: 0.5,
+      ease: 'power2.in',
+      onComplete: () => {
+        skillsBlock.classList.add('hidden');
+        profileBlock.classList.remove('hidden');
+        showMoreSubview(moreHomeView);
+        gsap.fromTo(profileBlock,
+          { x: -100, opacity: 0 },
+          { x: 0, opacity: 1, duration: 0.5, ease: 'power2.out' }
+        );
+      }
+    });
+  }
 
-  resultsButtons.forEach((button) => {
-    button.addEventListener('click', toggleResultsView);
-    button.addEventListener('touchstart', (e) => {
+  if (openMoreButton) {
+    openMoreButton.addEventListener('click', openMoreView);
+    openMoreButton.addEventListener('touchstart', (e) => {
       e.preventDefault();
-      toggleResultsView();
+      openMoreView();
     });
-  });
+  }
+
+  if (closeMoreButton) {
+    closeMoreButton.addEventListener('click', closeMoreView);
+    closeMoreButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      closeMoreView();
+    });
+  }
+
+  if (openMoreMusicButton) {
+    openMoreMusicButton.addEventListener('click', () => showMoreSubview(moreMusicView));
+  }
+
+  if (openMoreInterestsButton) {
+    openMoreInterestsButton.addEventListener('click', () => showMoreSubview(moreInterestsView));
+  }
+
+  if (moreMusicBackButton) {
+    moreMusicBackButton.addEventListener('click', () => showMoreSubview(moreHomeView));
+  }
+
+  if (moreInterestsBackButton) {
+    moreInterestsBackButton.addEventListener('click', () => showMoreSubview(moreHomeView));
+  }
 
   function updateInterestTab(interestKey) {
     const interest = interestsContent[interestKey];
