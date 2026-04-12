@@ -554,38 +554,53 @@
             margin-bottom: 10px;
         }
 
-        .hotspot-list,
-        .timeline-list {
-            list-style: none;
+        .discord-presence {
             display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .hotspot-list li {
-            display: flex;
-            justify-content: space-between;
+            align-items: center;
             gap: 10px;
+        }
+
+        .discord-avatar-wrap {
+            position: relative;
+            width: 44px;
+            height: 44px;
+            flex: 0 0 auto;
+        }
+
+        .discord-avatar {
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 1px solid rgba(255, 255, 255, 0.25);
+        }
+
+        .discord-indicator {
+            position: absolute;
+            right: 0;
+            bottom: 0;
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            border: 2px solid rgba(0, 0, 0, 0.8);
+            background: #747f8d;
+        }
+
+        .discord-indicator.online { background: #23a55a; }
+        .discord-indicator.idle { background: #f0b232; }
+        .discord-indicator.dnd { background: #f23f43; }
+        .discord-indicator.offline { background: #747f8d; }
+
+        .discord-main-line {
+            font-size: 14px;
+            color: rgba(255, 255, 255, 0.95);
+        }
+
+        .discord-sub-line,
+        .discord-music-line {
+            margin-top: 3px;
             font-size: 12px;
-            color: rgba(255, 255, 255, 0.9);
-        }
-
-        .hotspot-list li span {
-            color: rgba(255, 255, 255, 0.65);
-        }
-
-        .timeline-list li {
-            display: grid;
-            grid-template-columns: 76px 1fr;
-            gap: 8px;
-            align-items: baseline;
-            font-size: 12px;
-            color: rgba(255, 255, 255, 0.88);
-        }
-
-        .timeline-list li strong {
-            color: rgba(255, 255, 255, 0.6);
-            font-weight: normal;
+            color: rgba(255, 255, 255, 0.68);
         }
 
         .bio-separator {
@@ -1478,20 +1493,21 @@
 
             <div class="profile-meta-grid">
                 <section class="meta-block">
-                    <h3 class="meta-title">Weekly hotspots</h3>
-                    <ul class="hotspot-list">
-                        <li><strong>Night city edits</strong><span>Mon + Wed</span></li>
-                        <li><strong>Character clips</strong><span>Thu</span></li>
-                        <li><strong>Music update drops</strong><span>Fri</span></li>
-                    </ul>
+                    <h3 class="meta-title">Discord Status</h3>
+                    <div class="discord-presence" id="discord-presence" data-discord-id="YOUR_DISCORD_USER_ID">
+                        <div class="discord-avatar-wrap">
+                            <img id="discord-avatar" class="discord-avatar" src="assets/profile.gif" alt="Discord profile avatar">
+                            <span id="discord-indicator" class="discord-indicator offline" aria-hidden="true"></span>
+                        </div>
+                        <div>
+                            <div id="discord-main" class="discord-main-line">Discord presence unavailable</div>
+                            <div id="discord-sub" class="discord-sub-line">Set your Discord user ID in index.html</div>
+                        </div>
+                    </div>
                 </section>
                 <section class="meta-block">
-                    <h3 class="meta-title">Timeline</h3>
-                    <ul class="timeline-list">
-                        <li><strong>2024</strong><span>Started building wolf.lol</span></li>
-                        <li><strong>2025</strong><span>Added custom music player + tabs</span></li>
-                        <li><strong>2026</strong><span>Current profile revamp phase</span></li>
-                    </ul>
+                    <h3 class="meta-title">Music</h3>
+                    <div id="discord-music" class="discord-music-line">Not listening to anything right now.</div>
                 </section>
             </div>
 
