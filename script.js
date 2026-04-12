@@ -670,8 +670,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error("Failed to initialize cursor trail effect:", err);
       }
     }
-    typeWriterName();
-    typeWriterBio();
+    startLegacyTypingAnimations();
   };
 
   startScreen.addEventListener('click', startExperience);
@@ -681,22 +680,34 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { passive: false });
 
 
+  const LEGACY_PROFILE_NAME = 'wolf.';
+  const LEGACY_PROFILE_BIOS = ['the best oat.', 'love yall.'];
+  let hasStartedLegacyTypingAnimations = false;
+
   function delay(ms) {
     return new Promise((resolve) => setTimeout(resolve, ms));
   }
 
+  function startLegacyTypingAnimations() {
+    if (hasStartedLegacyTypingAnimations) return;
+    hasStartedLegacyTypingAnimations = true;
+    profileName.textContent = '';
+    profileBio.textContent = '';
+    typeWriterName();
+    typeWriterBio();
+  }
+
   async function typeWriterName() {
-    const username = 'wolf.';
     profileName.classList.add('typing-active');
 
     while (true) {
-      for (let i = 1; i <= username.length; i += 1) {
-        profileName.textContent = `${username.slice(0, i)}|`;
+      for (let i = 1; i <= LEGACY_PROFILE_NAME.length; i += 1) {
+        profileName.textContent = `${LEGACY_PROFILE_NAME.slice(0, i)}|`;
         await delay(95);
       }
       await delay(900);
-      for (let i = username.length - 1; i >= 0; i -= 1) {
-        profileName.textContent = `${username.slice(0, i)}|`;
+      for (let i = LEGACY_PROFILE_NAME.length - 1; i >= 0; i -= 1) {
+        profileName.textContent = `${LEGACY_PROFILE_NAME.slice(0, i)}|`;
         await delay(75);
       }
       await delay(250);
@@ -705,12 +716,11 @@ document.addEventListener('DOMContentLoaded', async () => {
 
 
   async function typeWriterBio() {
-    const bios = ['the best oat.', 'love yall.'];
     let activeBioIndex = 0;
     profileBio.classList.add('typing-active');
 
     while (true) {
-      const currentBio = bios[activeBioIndex];
+      const currentBio = LEGACY_PROFILE_BIOS[activeBioIndex];
       for (let i = 1; i <= currentBio.length; i += 1) {
         profileBio.textContent = `${currentBio.slice(0, i)}|`;
         await delay(60);
@@ -724,7 +734,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         await delay(35);
       }
       profileBio.classList.remove('is-swapping');
-      activeBioIndex = (activeBioIndex + 1) % bios.length;
+      activeBioIndex = (activeBioIndex + 1) % LEGACY_PROFILE_BIOS.length;
       await delay(150);
     }
   }
