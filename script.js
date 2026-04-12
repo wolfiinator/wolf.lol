@@ -164,32 +164,58 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const customMusicManifest = parseCustomPlayerManifest();
   const customArtists = [];
   const customTracks = [];
-  customMusicManifest.artists.forEach((artist, artistIndex) => {
-    const folder = (artist.folder || 'music').replace(/\/$/, '');
-    const artistEntry = {
-      index: artistIndex,
-      name: artist.name || `artist ${artistIndex + 1}`,
-      tracks: []
-    };
-
-    (artist.tracks || []).forEach((file) => {
-      const track = {
-        index: customTracks.length,
-        artistIndex,
-        artistName: artist.name || 'unknown artist',
-        src: `${folder}/${file}`,
-        coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
-        title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
+  function appendCustomArtists(artists = []) {
+    artists.forEach((artist) => {
+      const artistIndex = customArtists.length;
+      const folder = (artist.folder || 'music').replace(/\/$/, '');
+      const artistEntry = {
+        index: artistIndex,
+        name: artist.name || `artist ${artistIndex + 1}`,
+        tracks: []
       };
-      customTracks.push(track);
-      artistEntry.tracks.push(track);
-    });
 
-    customArtists.push(artistEntry);
-  });
+      (artist.tracks || []).forEach((file) => {
+        const track = {
+          index: customTracks.length,
+          artistIndex,
+          artistName: artist.name || 'unknown artist',
+          src: `${folder}/${file}`,
+          coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
+          title: decodeURIComponent(file).split('/').pop().replace(/\.[^.]+$/, '')
+        };
+        customTracks.push(track);
+        artistEntry.tracks.push(track);
+      });
+
+      customArtists.push(artistEntry);
+    });
+  }
+
+  async function loadDriveMusicManifest() {
+    try {
+      const response = await fetch('music/drive_manifest.json', { cache: 'no-store' });
+      if (!response.ok) {
+        return;
+      }
+      const parsed = await response.json();
+      if (!Array.isArray(parsed?.artists) || parsed.artists.length === 0) {
+        return;
+      }
+      appendCustomArtists(parsed.artists);
+      renderArtistList();
+      if (activeArtistIndex >= 0) {
+        renderTrackList();
+        updateActiveTrackUI();
+      }
+    } catch (err) {
+      console.error('Failed to load drive music manifest:', err);
+    }
+  }
+
+  const customMusicManifest = parseCustomPlayerManifest();
+  appendCustomArtists(customMusicManifest.artists);
   let activeCustomTrackIndex = -1;
   let activeArtistIndex = -1;
 
@@ -1008,6 +1034,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateInterestTab('beastars');
   renderArtistList();
+  loadDriveMusicManifest();
   showMusicArtistList();
   refreshPlayPauseButton();
   refreshLoopButton();
