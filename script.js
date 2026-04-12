@@ -176,6 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   const customArtists = [];
   const customTracks = [];
+  let driveManifestLoaded = false;
   function appendCustomArtists(artists = []) {
     artists.forEach((artist) => {
       const artistIndex = customArtists.length;
@@ -249,6 +250,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       appendCustomArtists(parsed.artists);
+      driveManifestLoaded = true;
       applyDriveThemeManifest(parsed);
       renderArtistList();
       if (activeArtistIndex >= 0) {
@@ -464,7 +466,9 @@ document.addEventListener('DOMContentLoaded', () => {
     musicArtistListNode.innerHTML = '';
 
     if (customArtists.length === 0) {
-      musicArtistListNode.textContent = 'No artists configured yet.';
+      musicArtistListNode.textContent = driveManifestLoaded
+        ? 'No artists configured yet.'
+        : 'No artists configured yet. Run `python3 scripts/sync_drive_music.py` to import from Google Drive.';
       return;
     }
 
