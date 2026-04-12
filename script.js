@@ -28,7 +28,7 @@ function initMedia() {
   });
 }
 
-document.addEventListener('DOMContentLoaded', () => {
+document.addEventListener('DOMContentLoaded', async () => {
   const startScreen = document.getElementById('start-screen');
   const startText = document.getElementById('start-text');
   const profileName = document.getElementById('profile-name');
@@ -147,7 +147,19 @@ document.addEventListener('DOMContentLoaded', () => {
     return themedTrack || musicManifest.tracks[0];
   }
 
-  function parseCustomPlayerManifest() {
+  async function parseCustomPlayerManifest() {
+    try {
+      const response = await fetch('custom-player-manifest.json', { cache: 'no-store' });
+      if (response.ok) {
+        const parsed = await response.json();
+        if (Array.isArray(parsed?.artists)) {
+          return parsed;
+        }
+      }
+    } catch (err) {
+      console.warn('Failed to load external custom player manifest:', err);
+    }
+
     if (!customPlayerManifestNode) {
       return { artists: [] };
     }
@@ -164,7 +176,30 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const customMusicManifest = parseCustomPlayerManifest();
+  function getTrackTitle(trackFile, configuredTitle) {
+    if (typeof configuredTitle === 'string' && configuredTitle.trim()) {
+      return configuredTitle.trim();
+    }
+
+    const fileName = (trackFile || '').split('/').pop() || '';
+    return decodeURIComponent(fileName)
+      .replace(/\.[^.]+$/, '')
+      .replace(/[._-]+/g, ' ')
+      .replace(/\s+/g, ' ')
+      .trim();
+  }
+
+  function resolveCoverSource(folder, artistCover, trackCover) {
+    if (trackCover) {
+      return `${folder}/${trackCover}`;
+    }
+    if (artistCover) {
+      return `${folder}/${artistCover}`;
+    }
+    return 'assets/profile.gif';
+  }
+
+  const customMusicManifest = await parseCustomPlayerManifest();
   const customArtists = [];
   const customTracks = [];
   customMusicManifest.artists.forEach((artist, artistIndex) => {
@@ -175,14 +210,18 @@ document.addEventListener('DOMContentLoaded', () => {
       tracks: []
     };
 
-    (artist.tracks || []).forEach((file) => {
+    (artist.tracks || []).forEach((trackEntry) => {
+      const trackConfig = typeof trackEntry === 'string' ? { file: trackEntry } : (trackEntry || {});
+      if (!trackConfig.file) {
+        return;
+      }
       const track = {
         index: customTracks.length,
         artistIndex,
         artistName: artist.name || 'unknown artist',
-        src: `${folder}/${file}`,
-        coverSrc: artist.cover ? `${folder}/${artist.cover}` : 'assets/profile.gif',
-        title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
+        src: `${folder}/${trackConfig.file}`,
+        coverSrc: resolveCoverSource(folder, artist.cover, trackConfig.cover),
+        title: getTrackTitle(trackConfig.file, trackConfig.title)
       };
       customTracks.push(track);
       artistEntry.tracks.push(track);

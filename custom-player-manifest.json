@@ -1,0 +1,36 @@
+{
+  "artists": [
+    {
+      "name": "montell fish",
+      "folder": "music/montell fish",
+      "tracks": [
+        {
+          "file": "fall in love with you/fall in love with you..mp3",
+          "title": "fall in love with you",
+          "cover": "fall in love with you/5db8244c49d8eac3dc8fe77d0e180509.1000x1000x1.png"
+        },
+        {
+          "file": "i destroy myself for you/i destroy myself for you..mp3",
+          "title": "i destroy myself for you",
+          "cover": "i destroy myself for you/1200x1200bf-60.jpg"
+        }
+      ]
+    },
+    {
+      "name": "sombr",
+      "folder": "music/sombr",
+      "tracks": [
+        {
+          "file": "alibi/alibi.mp3",
+          "title": "alibi",
+          "cover": "alibi/sombr-alibi-artwork.jpg"
+        },
+        {
+          "file": "would_ve been you/would've been you.mp3",
+          "title": "would've been you",
+          "cover": "would_ve been you/maxresdefault (1).jpg"
+        }
+      ]
+    }
+  ]
+}
