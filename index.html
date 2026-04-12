@@ -120,6 +120,16 @@
             border-color: rgba(255, 255, 255, 0.8);
         }
 
+        .smooth-clickable {
+            will-change: transform, filter, box-shadow;
+            transition: transform 0.24s cubic-bezier(0.22, 1, 0.36, 1), filter 0.24s ease, box-shadow 0.24s ease;
+        }
+
+        .smooth-clickable.is-pressed {
+            filter: brightness(1.12);
+            box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.22), 0 8px 22px rgba(0, 0, 0, 0.4);
+        }
+
         
         .volume-control {
             display: flex;
