@@ -1,0 +1,35 @@
+name: Update custom music manifest
+
+on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'music/**'
+      - 'scripts/generate-custom-player-manifest.mjs'
+      - '.github/workflows/update-custom-player-manifest.yml'
+
+permissions:
+  contents: write
+
+jobs:
+  regenerate-manifest:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Generate custom manifest
+        run: node scripts/generate-custom-player-manifest.mjs
+
+      - name: Commit manifest updates
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: 'chore: regenerate custom music manifest'
+          file_pattern: custom-player-manifest.json
