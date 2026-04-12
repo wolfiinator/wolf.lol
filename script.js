@@ -403,6 +403,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
     if (minimizedHud) {
       minimizedHud.classList.remove('hidden');
+      requestAnimationFrame(() => {
+        minimizedHud.classList.add('is-visible');
+      });
     }
     refreshMinimizedTrack();
   }
@@ -410,6 +413,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function exitMinimizedMode() {
     document.body.classList.remove('minimized-mode');
     if (minimizedHud) {
+      minimizedHud.classList.remove('is-visible');
       minimizedHud.classList.add('hidden');
     }
     profileBlock.classList.remove('hidden');
