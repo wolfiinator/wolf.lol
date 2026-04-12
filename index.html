@@ -1339,13 +1339,26 @@
 
     <script id="music-manifest" type="application/json">
         {
-            "folder": "",
-            "tracks": []
+            "folder": "assets/music",
+            "tracks": [
+                { "name": "Home", "file": "background_music.mp3", "theme": "home-theme" },
+                { "name": "Hacker", "file": "hacker_music.mp3", "theme": "hacker-theme" },
+                { "name": "Rain", "file": "rain_music.mp3", "theme": "rain-theme" },
+                { "name": "Anime", "file": "anime_music.mp3", "theme": "anime-theme" },
+                { "name": "Car", "file": "car_music.mp3", "theme": "car-theme" }
+            ]
         }
     </script>
     <script id="custom-player-manifest" type="application/json">
         {
-            "artists": []
+            "artists": [
+                {
+                    "name": "sombr",
+                    "folder": "music/sombr",
+                    "cover": "maxresdefault (1).jpg",
+                    "tracks": ["would've been you.mp3"]
+                }
+            ]
         }
     </script>
     <audio id="music-player" loop preload="metadata"></audio>
