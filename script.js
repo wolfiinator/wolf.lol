@@ -35,20 +35,25 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileBio = document.getElementById('profile-bio');
   const visitorCount = document.getElementById('visitor-count');
   const musicPlayer = document.getElementById('music-player');
+  const albumPlayer = document.getElementById('album-player');
   const musicManifestNode = document.getElementById('music-manifest');
-  const homeButton = document.getElementById('home-theme');
-  const hackerButton = document.getElementById('hacker-theme');
-  const rainButton = document.getElementById('rain-theme');
-  const animeButton = document.getElementById('anime-theme');
-  const carButton = document.getElementById('car-theme');
+  const customPlayerManifestNode = document.getElementById('custom-player-manifest');
+  const openMusicPlayerButton = document.getElementById('open-music-player');
+  const musicModal = document.getElementById('music-modal');
+  const musicCloseButton = document.getElementById('music-close');
+  const musicListNode = document.getElementById('music-list');
+  const musicNowPlayingNode = document.getElementById('music-now-playing');
+  const musicCoverNode = document.getElementById('music-cover');
+  const musicPrevButton = document.getElementById('music-prev');
+  const musicPlayPauseButton = document.getElementById('music-play-pause');
+  const musicNextButton = document.getElementById('music-next');
+  const musicLoopButton = document.getElementById('music-loop');
   const resultsButtons = document.querySelectorAll('.results-toggle');
   const profileClock = document.getElementById('profile-clock');
   const volumeIcon = document.getElementById('volume-icon');
   const volumeSlider = document.getElementById('volume-slider');
   const transparencySlider = document.getElementById('transparency-slider');
   const backgroundVideo = document.getElementById('background');
-  const hackerOverlay = document.getElementById('hacker-overlay');
-  const snowOverlay = document.getElementById('snow-overlay');
   const glitchOverlay = document.querySelector('.glitch-overlay');
   const profileBlock = document.getElementById('profile-block');
   const skillsBlock = document.getElementById('skills-block');
@@ -92,11 +97,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const fallbackManifest = {
     folder: 'assets',
     tracks: [
-      { name: 'Background', file: 'background_music.mp3', theme: 'home-theme' },
-      { name: 'Hacker', file: 'hacker_music.mp3', theme: 'hacker-theme' },
-      { name: 'Rain', file: 'rain_music.mp3', theme: 'rain-theme' },
-      { name: 'Anime', file: 'anime_music.mp3', theme: 'anime-theme' },
-      { name: 'Car', file: 'car_music.mp3', theme: 'car-theme' }
+      { name: 'Rain', file: 'rain_music.mp3', theme: 'rain-theme' }
     ]
   };
 
@@ -128,6 +129,34 @@ document.addEventListener('DOMContentLoaded', () => {
     const themedTrack = musicManifest.tracks.find((track) => track.theme === themeClass);
     return themedTrack || musicManifest.tracks[0];
   }
+
+  function parseCustomPlayerManifest() {
+    if (!customPlayerManifestNode) {
+      return { artists: [] };
+    }
+
+    try {
+      const parsed = JSON.parse(customPlayerManifestNode.textContent);
+      if (!Array.isArray(parsed?.artists)) {
+        return { artists: [] };
+      }
+      return parsed;
+    } catch (err) {
+      console.error('Failed to parse custom player manifest:', err);
+      return { artists: [] };
+    }
+  }
+
+  const customMusicManifest = parseCustomPlayerManifest();
+  const customTracks = customMusicManifest.artists.flatMap((artist) =>
+    (artist.tracks || []).map((file) => ({
+      artistName: artist.name || 'unknown artist',
+      src: `${(artist.folder || 'music').replace(/\/$/, '')}/${file}`,
+      coverSrc: `${(artist.folder || 'music').replace(/\/$/, '')}/${artist.cover || ''}`,
+      title: decodeURIComponent(file).replace(/\.[^.]+$/, '')
+    }))
+  );
+  let activeCustomTrackIndex = -1;
 
 
   const cursor = document.querySelector('.custom-cursor');
@@ -192,23 +221,23 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 500);
 
 
-  function initializeVisitorCounter() {
-    let totalVisitors = localStorage.getItem('totalVisitorCount');
-    if (!totalVisitors) {
-      totalVisitors = 7922;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-    } else {
-      totalVisitors = parseInt(totalVisitors);
-    }
+  async function initializeVisitorCounter() {
+    const namespace = 'wolflol';
+    const key = 'profile-views';
+    const fallbackCount = 7922;
 
-    const hasVisited = localStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      totalVisitors++;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-      localStorage.setItem('hasVisited', 'true');
+    try {
+      const response = await fetch(`https://api.countapi.xyz/hit/${namespace}/${key}`);
+      if (!response.ok) {
+        throw new Error(`Unexpected response status: ${response.status}`);
+      }
+      const data = await response.json();
+      const count = Number.isFinite(data?.value) ? data.value : fallbackCount;
+      visitorCount.textContent = count.toLocaleString();
+    } catch (err) {
+      console.error('Failed to fetch persistent visitor count:', err);
+      visitorCount.textContent = fallbackCount.toLocaleString();
     }
-
-    visitorCount.textContent = totalVisitors.toLocaleString();
   }
 
 
@@ -226,6 +255,94 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateProfileClock();
   setInterval(updateProfileClock, 1000);
+
+  function openMusicModal() {
+    if (!musicModal) return;
+    musicModal.classList.remove('hidden');
+    musicModal.setAttribute('aria-hidden', 'false');
+  }
+
+  function closeMusicModal() {
+    if (!musicModal) return;
+    musicModal.classList.add('hidden');
+    musicModal.setAttribute('aria-hidden', 'true');
+  }
+
+  function refreshPlayPauseButton() {
+    if (!musicPlayPauseButton || !albumPlayer) return;
+    musicPlayPauseButton.textContent = albumPlayer.paused ? 'Play' : 'Pause';
+  }
+
+  function refreshLoopButton() {
+    if (!musicLoopButton || !albumPlayer) return;
+    musicLoopButton.textContent = `Loop: ${albumPlayer.loop ? 'on' : 'off'}`;
+  }
+
+  function renderTrackList() {
+    if (!musicListNode) return;
+    musicListNode.innerHTML = '';
+
+    if (customTracks.length === 0) {
+      musicListNode.textContent = 'No songs added yet.';
+      return;
+    }
+
+    const grouped = customTracks.reduce((acc, track, index) => {
+      if (!acc[track.artistName]) {
+        acc[track.artistName] = [];
+      }
+      acc[track.artistName].push({ ...track, index });
+      return acc;
+    }, {});
+
+    Object.entries(grouped).forEach(([artistName, tracks]) => {
+      const artistLabel = document.createElement('div');
+      artistLabel.className = 'music-artist';
+      artistLabel.textContent = artistName;
+      musicListNode.appendChild(artistLabel);
+
+      tracks.forEach((track) => {
+        const button = document.createElement('button');
+        button.className = 'music-track-button';
+        button.type = 'button';
+        button.textContent = track.title;
+        button.addEventListener('click', () => playCustomTrack(track.index));
+        musicListNode.appendChild(button);
+      });
+    });
+  }
+
+  function updateActiveTrackUI() {
+    const trackButtons = document.querySelectorAll('.music-track-button');
+    trackButtons.forEach((button, index) => {
+      button.classList.toggle('active', index === activeCustomTrackIndex);
+    });
+  }
+
+  function playCustomTrack(index) {
+    if (!albumPlayer || index < 0 || index >= customTracks.length) return;
+    const track = customTracks[index];
+    activeCustomTrackIndex = index;
+    albumPlayer.src = track.src;
+    albumPlayer.volume = volumeSlider.value;
+    albumPlayer.muted = isMuted;
+    albumPlayer.play().catch((err) => console.error('Failed to play custom track:', err));
+    if (musicNowPlayingNode) {
+      musicNowPlayingNode.textContent = `Now Playing: ${track.artistName} — ${track.title}`;
+    }
+    if (musicCoverNode && track.coverSrc) {
+      musicCoverNode.src = track.coverSrc;
+      musicCoverNode.alt = `${track.artistName} album cover`;
+      musicCoverNode.classList.remove('pulse');
+      void musicCoverNode.offsetWidth;
+      musicCoverNode.classList.add('pulse');
+    }
+    updateActiveTrackUI();
+    refreshPlayPauseButton();
+    if (currentAudio) {
+      currentAudio.pause();
+    }
+  }
 
 
   startScreen.addEventListener('click', () => {
@@ -384,11 +501,25 @@ document.addEventListener('DOMContentLoaded', () => {
 
   let isMuted = false;
   currentAudio.muted = true;
-  playTrackForTheme('home-theme');
+  playTrackForTheme('rain-theme');
+
+  function startPrimaryColorLoop() {
+    const palette = ['#1E3A8A', '#2563EB', '#3B82F6', '#1D4ED8'];
+    let colorIndex = 0;
+    setInterval(() => {
+      colorIndex = (colorIndex + 1) % palette.length;
+      document.documentElement.style.setProperty('--primary-color', palette[colorIndex]);
+    }, 1800);
+  }
+
+  startPrimaryColorLoop();
 
   volumeIcon.addEventListener('click', () => {
     isMuted = !isMuted;
     currentAudio.muted = isMuted;
+    if (albumPlayer) {
+      albumPlayer.muted = isMuted;
+    }
     volumeIcon.innerHTML = isMuted
       ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>`
       : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
@@ -398,6 +529,9 @@ document.addEventListener('DOMContentLoaded', () => {
     e.preventDefault();
     isMuted = !isMuted;
     currentAudio.muted = isMuted;
+    if (albumPlayer) {
+      albumPlayer.muted = isMuted;
+    }
     volumeIcon.innerHTML = isMuted
       ? `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2"></path>`
       : `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
@@ -405,6 +539,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
   volumeSlider.addEventListener('input', () => {
     currentAudio.volume = volumeSlider.value;
+    if (albumPlayer) {
+      albumPlayer.volume = volumeSlider.value;
+    }
     isMuted = false;
     currentAudio.muted = false;
     volumeIcon.innerHTML = `<path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.536 8.464a5 5 0 010 7.072m2.828-9.9a9 9 0 010 12.728M5.586 15H4a1 1 0 01-1-1v-4a1 1 0 011-1h1.586l4.707-4.707C10.923 3.663 12 4.109 12 5v14c0 .891-1.077 1.337-1.707.707L5.586 15z"></path>`;
@@ -464,109 +601,6 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  function switchTheme(videoSrc, themeClass, overlay = null, overlayOverProfile = false) {
-    let primaryColor;
-    switch (themeClass) {
-      case 'home-theme':
-        primaryColor = '#00CED1';
-        break;
-      case 'hacker-theme':
-        primaryColor = '#22C55E';
-        break;
-      case 'rain-theme':
-        primaryColor = '#1E3A8A';
-        break;
-      case 'anime-theme':
-        primaryColor = '#DC2626';
-        break;
-      case 'car-theme':
-        primaryColor = '#EAB308';
-        break;
-      default:
-        primaryColor = '#00CED1';
-    }
-    document.documentElement.style.setProperty('--primary-color', primaryColor);
-
-    gsap.to(backgroundVideo, {
-      opacity: 0,
-      duration: 0.5,
-      ease: 'power2.in',
-      onComplete: () => {
-        backgroundVideo.src = videoSrc;
-
-        if (currentAudio) {
-          currentAudio.pause();
-          currentAudio.currentTime = 0;
-        }
-        playTrackForTheme(themeClass);
-
-        document.body.classList.remove('home-theme', 'hacker-theme', 'rain-theme', 'anime-theme', 'car-theme');
-        document.body.classList.add(themeClass);
-
-        hackerOverlay.classList.add('hidden');
-        snowOverlay.classList.add('hidden');
-        profileBlock.style.zIndex = overlayOverProfile ? 10 : 20;
-        skillsBlock.style.zIndex = overlayOverProfile ? 10 : 20;
-        if (overlay) {
-          overlay.classList.remove('hidden');
-        }
-
-        gsap.to(backgroundVideo, {
-          opacity: 1,
-          duration: 0.5,
-          ease: 'power2.out',
-          onComplete: () => {
-            profileContainer.classList.remove('orbit');
-            void profileContainer.offsetWidth;
-            profileContainer.classList.add('orbit');
-          }
-        });
-      }
-    });
-  }
-
-
-  homeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'home-theme');
-  });
-  homeButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'home-theme');
-  });
-
-  hackerButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
-  });
-  hackerButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
-  });
-
-  rainButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
-  });
-  rainButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
-  });
-
-  animeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'anime-theme');
-  });
-  animeButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'anime-theme');
-  });
-
-  carButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'car-theme');
-  });
-  carButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'car-theme');
-  });
-
- 
   function handleTilt(e, element) {
     const rect = element.getBoundingClientRect();
     const centerX = rect.left + rect.width / 2;
@@ -653,28 +687,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   profilePicture.addEventListener('click', () => {
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
+    profileContainer.classList.add('boost-orbit');
     setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
+      profileContainer.classList.remove('boost-orbit');
+    }, 550);
   });
 
   profilePicture.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
+    profileContainer.classList.add('boost-orbit');
     setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
+      profileContainer.classList.remove('boost-orbit');
+    }, 550);
   });
 
  
@@ -759,6 +783,77 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
   updateInterestTab('beastars');
+  renderTrackList();
+  refreshPlayPauseButton();
+  refreshLoopButton();
+
+  if (openMusicPlayerButton) {
+    openMusicPlayerButton.addEventListener('click', openMusicModal);
+    openMusicPlayerButton.addEventListener('touchstart', (e) => {
+      e.preventDefault();
+      openMusicModal();
+    });
+  }
+
+  if (musicCloseButton) {
+    musicCloseButton.addEventListener('click', closeMusicModal);
+  }
+
+  if (musicModal) {
+    musicModal.addEventListener('click', (e) => {
+      if (e.target === musicModal) {
+        closeMusicModal();
+      }
+    });
+  }
+
+  if (musicPlayPauseButton && albumPlayer) {
+    musicPlayPauseButton.addEventListener('click', () => {
+      if (!albumPlayer.src && customTracks.length > 0) {
+        playCustomTrack(0);
+        return;
+      }
+      if (albumPlayer.paused) {
+        albumPlayer.play().catch((err) => console.error('Failed to resume custom track:', err));
+      } else {
+        albumPlayer.pause();
+      }
+      refreshPlayPauseButton();
+    });
+  }
+
+  if (musicPrevButton) {
+    musicPrevButton.addEventListener('click', () => {
+      if (customTracks.length === 0) return;
+      const nextIndex = activeCustomTrackIndex <= 0 ? customTracks.length - 1 : activeCustomTrackIndex - 1;
+      playCustomTrack(nextIndex);
+    });
+  }
+
+  if (musicNextButton) {
+    musicNextButton.addEventListener('click', () => {
+      if (customTracks.length === 0) return;
+      const nextIndex = (activeCustomTrackIndex + 1) % customTracks.length;
+      playCustomTrack(nextIndex);
+    });
+  }
+
+  if (musicLoopButton && albumPlayer) {
+    musicLoopButton.addEventListener('click', () => {
+      albumPlayer.loop = !albumPlayer.loop;
+      refreshLoopButton();
+    });
+  }
+
+  if (albumPlayer) {
+    albumPlayer.addEventListener('play', refreshPlayPauseButton);
+    albumPlayer.addEventListener('pause', refreshPlayPauseButton);
+    albumPlayer.addEventListener('ended', () => {
+      if (customTracks.length === 0) return;
+      const nextIndex = (activeCustomTrackIndex + 1) % customTracks.length;
+      playCustomTrack(nextIndex);
+    });
+  }
 
 
   typeWriterStart();

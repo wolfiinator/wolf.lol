@@ -245,8 +245,8 @@
             box-shadow: none;
         }
 
-        .profile-container.fast-orbit::after {
-            animation: fast-orbit 0.5s linear forwards;
+        .profile-container.boost-orbit::after {
+            animation-duration: 0.65s;
         }
 
         .profile-picture {
@@ -407,6 +407,7 @@
         .visitor-counter {
             display: flex;
             align-items: center;
+            flex-wrap: wrap;
             gap: 8px;
             background: rgba(255, 255, 255, 0.1);
             padding: 8px 15px;
@@ -451,6 +452,137 @@
             opacity: 1 !important;
         }
 
+        .music-player-open {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            font-size: 12px;
+            border-radius: 999px;
+            padding: 4px 10px;
+            cursor: pointer;
+        }
+
+        .music-player-open:hover {
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .music-modal {
+            position: fixed;
+            inset: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0, 0, 0, 0.66);
+            z-index: 40;
+            padding: 16px;
+            animation: modalFadeIn 0.35s ease;
+        }
+
+        .music-modal-content {
+            width: min(520px, 100%);
+            max-height: 90vh;
+            overflow-y: auto;
+            border-radius: 14px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(10, 10, 18, 0.95);
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            animation: modalPopIn 0.42s cubic-bezier(0.22, 1, 0.36, 1);
+        }
+
+        .music-modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .music-close {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: transparent;
+            color: #fff;
+            font-size: 14px;
+            border-radius: 8px;
+            padding: 3px 8px;
+            cursor: pointer;
+        }
+
+        .music-cover {
+            width: 100%;
+            max-height: 240px;
+            object-fit: cover;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.15);
+            animation: coverFloat 4s ease-in-out infinite;
+        }
+
+        .music-cover.pulse {
+            animation: coverPulse 0.55s ease, coverFloat 4s ease-in-out infinite;
+        }
+
+        .music-list {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+
+        .music-artist {
+            color: rgba(255, 255, 255, 0.8);
+            font-size: 12px;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        .music-track-button {
+            width: 100%;
+            text-align: left;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background: rgba(255, 255, 255, 0.06);
+            color: #fff;
+            border-radius: 8px;
+            padding: 8px 10px;
+            cursor: pointer;
+            transform: translateZ(0);
+            transition: transform 0.24s ease, box-shadow 0.24s ease, background 0.24s ease, border-color 0.24s ease;
+        }
+
+        .music-track-button:hover {
+            transform: translateX(6px);
+            box-shadow: 0 0 16px rgba(255, 255, 255, 0.18);
+        }
+
+        .music-track-button.active {
+            border-color: rgba(255, 255, 255, 0.65);
+            background: rgba(255, 255, 255, 0.16);
+        }
+
+        .music-controls {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .music-controls button {
+            border: 1px solid rgba(255, 255, 255, 0.35);
+            background: rgba(255, 255, 255, 0.08);
+            color: #fff;
+            border-radius: 8px;
+            padding: 6px 10px;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.25s ease, background 0.25s ease;
+        }
+
+        .music-controls button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0 14px rgba(106, 165, 255, 0.4);
+            background: rgba(104, 163, 255, 0.2);
+        }
+
+        #music-now-playing {
+            animation: nowPlayingGlow 2.6s ease-in-out infinite;
+        }
+
         .social-links {
             display: flex;
             justify-content: center;
@@ -461,16 +593,30 @@
         }
 
         .social-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
             width: 36px;
             height: 36px;
-            transition: transform 0.3s ease;
-            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.7));
+            border-radius: 50%;
+            color: rgba(255, 255, 255, 0.92);
+            border: 1px solid rgba(255, 255, 255, 0.38);
+            background: rgba(255, 255, 255, 0.04);
+            transition: transform 0.3s ease, box-shadow 0.3s ease, background 0.3s ease;
+            box-shadow: 0 0 8px rgba(255, 255, 255, 0.35), inset 0 0 8px rgba(255, 255, 255, 0.1);
             pointer-events: auto;
             opacity: 1 !important;
         }
 
         .social-icon:hover {
-            transform: scale(1.4) rotateY(15deg);
+            transform: scale(1.2) rotateY(15deg);
+            box-shadow: 0 0 16px rgba(129, 175, 255, 0.75), inset 0 0 12px rgba(129, 175, 255, 0.4);
+            background: rgba(129, 175, 255, 0.12);
+        }
+
+        .social-icon svg {
+            width: 20px;
+            height: 20px;
         }
 
         
@@ -656,13 +802,30 @@
             }
         }
 
-        @keyframes fast-orbit {
-            0% {
-                transform: rotate(0deg);
-            }
-            100% {
-                transform: rotate(360deg);
-            }
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+
+        @keyframes modalPopIn {
+            from { transform: translateY(24px) scale(0.95); opacity: 0; }
+            to { transform: translateY(0) scale(1); opacity: 1; }
+        }
+
+        @keyframes coverFloat {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-4px); }
+        }
+
+        @keyframes nowPlayingGlow {
+            0%, 100% { text-shadow: 0 0 2px rgba(255, 255, 255, 0.2); }
+            50% { text-shadow: 0 0 14px rgba(119, 170, 255, 0.75); }
+        }
+
+        @keyframes coverPulse {
+            0% { transform: scale(0.98); }
+            50% { transform: scale(1.03); }
+            100% { transform: scale(1); }
         }
 
         
@@ -885,7 +1048,7 @@
     </style>
     <link href="https://fonts.cdnfonts.com/css/minecraftia" rel="stylesheet">
 </head>
-<body class="home-theme" onload="initMedia()">
+<body class="rain-theme" onload="initMedia()">
     
     <div class="custom-cursor"></div>
 
@@ -954,17 +1117,20 @@
             <div class="profile-footer">
 
                 <div class="social-links">
-                    <a href="https://discord.gg/motiongoats" target="_blank">
-                        <img src="assets/discord.png" alt="Discord" class="social-icon">
+                    <a href="https://www.roblox.com/users/1431265/profile" target="_blank" class="social-icon" aria-label="Roblox">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M4.56 2.1 1.6 19.4 19.42 21.9 22.4 4.6zM9.3 8.5l6.2.9-.9 6.1-6.2-.9z"/>
+                        </svg>
                     </a>
-                    <a href="https://github.com/wolf" target="_blank">
-                        <img src="assets/github.png" alt="GitHub" class="social-icon">
+                    <a href="https://open.spotify.com/user/31lez5xyleoiud5hvbqgt5mgfwzq?si=68d2ab23bd1c406c" target="_blank" class="social-icon" aria-label="Spotify">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M12 1.5a10.5 10.5 0 1 0 0 21 10.5 10.5 0 0 0 0-21Zm4.86 15.15a.78.78 0 0 1-1.07.25c-2.92-1.78-6.6-2.18-10.95-1.2a.78.78 0 0 1-.34-1.53c4.76-1.06 8.84-.6 12.1 1.38.37.23.49.71.26 1.1Zm1.53-3.4a.97.97 0 0 1-1.33.3c-3.34-2.05-8.44-2.64-12.38-1.42a.97.97 0 1 1-.57-1.86c4.52-1.38 10.14-.72 13.97 1.62.45.27.59.86.31 1.36Zm.14-3.55c-4-2.37-10.6-2.59-14.43-1.46a1.17 1.17 0 1 1-.66-2.24c4.42-1.3 11.76-1.04 16.29 1.65a1.17 1.17 0 0 1-1.2 2.05Z"/>
+                        </svg>
                     </a>
-                    <a href="https://www.youtube.com/@wolf" target="_blank">
-                        <img src="assets/youtube.png" alt="YouTube" class="social-icon">
-                    </a>
-                    <a href="https://www.tiktok.com/@wolf" target="_blank">
-                        <img src="assets/tiktok.png" alt="TikTok" class="social-icon">
+                    <a href="https://www.tiktok.com/@c0smicc2" target="_blank" class="social-icon" aria-label="TikTok">
+                        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true">
+                            <path d="M14.5 3c.2 1.9 1.3 3.7 3 4.6.9.5 1.8.7 2.8.7v3.1a8 8 0 0 1-3.1-.6v5.8a6.6 6.6 0 1 1-5.9-6.6v3.2a3.4 3.4 0 1 0 2.2 3.2V3z"/>
+                        </svg>
                     </a>
                 </div>
 
@@ -975,6 +1141,7 @@
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
                     </svg>
                     <span id="visitor-count">7,922</span>
+                    <button id="open-music-player" class="music-player-open" type="button">music player</button>
                     <span class="tooltip">Profile Views</span>
                 </div>
             </div>
@@ -1003,16 +1170,6 @@
             </div>
         </div>
 
-
-        <div class="controls">
-            <div id="home-theme" class="theme-button">1</div>
-            <div id="hacker-theme" class="theme-button">2</div>
-            <div id="rain-theme" class="theme-button">3</div>
-            <div id="anime-theme" class="theme-button">4</div>
-            <div id="car-theme" class="theme-button">5</div>
-        </div>
-
-
         <div class="top-controls">
             <div class="volume-control">
                 <svg id="volume-icon" class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
@@ -1030,20 +1187,47 @@
         </div>
     </div>
 
+    <div id="music-modal" class="music-modal hidden" aria-hidden="true">
+        <div class="music-modal-content">
+            <div class="music-modal-header">
+                <h3>Music Player</h3>
+                <button id="music-close" class="music-close" type="button">Close</button>
+            </div>
+            <img id="music-cover" class="music-cover" src="assets/profile.gif" alt="Album cover">
+            <div id="music-now-playing">No track selected</div>
+            <div id="music-list" class="music-list"></div>
+            <div class="music-controls">
+                <button id="music-prev" type="button">Prev</button>
+                <button id="music-play-pause" type="button">Play</button>
+                <button id="music-next" type="button">Next</button>
+                <button id="music-loop" type="button">Loop: off</button>
+            </div>
+        </div>
+    </div>
+
 
     <script id="music-manifest" type="application/json">
         {
-            "folder": "assets/music",
+            "folder": "assets",
             "tracks": [
-                { "name": "Home", "file": "background_music.mp3", "theme": "home-theme" },
-                { "name": "Hacker", "file": "hacker_music.mp3", "theme": "hacker-theme" },
-                { "name": "Rain", "file": "rain_music.mp3", "theme": "rain-theme" },
-                { "name": "Anime", "file": "anime_music.mp3", "theme": "anime-theme" },
-                { "name": "Car", "file": "car_music.mp3", "theme": "car-theme" }
+                { "name": "Rain", "file": "rain_music.mp3", "theme": "rain-theme" }
+            ]
+        }
+    </script>
+    <script id="custom-player-manifest" type="application/json">
+        {
+            "artists": [
+                {
+                    "name": "sombr",
+                    "folder": "music/sombr",
+                    "cover": "maxresdefault (1).jpg",
+                    "tracks": ["would've been you.mp3"]
+                }
             ]
         }
     </script>
     <audio id="music-player" loop preload="metadata"></audio>
+    <audio id="album-player" preload="metadata"></audio>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
