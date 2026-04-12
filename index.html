@@ -533,6 +533,61 @@
             opacity: 1 !important;
         }
 
+        .profile-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+            gap: 14px;
+        }
+
+        .meta-block {
+            background: rgba(255, 255, 255, 0.06);
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            border-radius: 12px;
+            padding: 12px;
+        }
+
+        .meta-title {
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.75);
+            margin-bottom: 10px;
+        }
+
+        .hotspot-list,
+        .timeline-list {
+            list-style: none;
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .hotspot-list li {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .hotspot-list li span {
+            color: rgba(255, 255, 255, 0.65);
+        }
+
+        .timeline-list li {
+            display: grid;
+            grid-template-columns: 76px 1fr;
+            gap: 8px;
+            align-items: baseline;
+            font-size: 12px;
+            color: rgba(255, 255, 255, 0.88);
+        }
+
+        .timeline-list li strong {
+            color: rgba(255, 255, 255, 0.6);
+            font-weight: normal;
+        }
+
         .bio-separator {
             width: 100%;
             height: 1px;
@@ -896,11 +951,19 @@
             gap: 14px;
         }
 
+        .interest-header-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+        }
+
         .interest-tabs {
             display: flex;
             flex-wrap: wrap;
             gap: 8px;
             justify-content: center;
+            flex: 1;
         }
 
         .interest-tab {
@@ -946,6 +1009,19 @@
             font-size: 13px;
             line-height: 1.6;
             color: rgba(255, 255, 255, 0.9);
+        }
+
+        .interest-next-button {
+            opacity: 0;
+            transform: translateY(6px);
+            pointer-events: none;
+            transition: opacity 0.24s ease, transform 0.24s ease;
+        }
+
+        .interest-next-button.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
         }
 
         .skill {
@@ -1197,6 +1273,10 @@
                 margin: 15px 0;
             }
 
+            .profile-meta-grid {
+                grid-template-columns: 1fr;
+            }
+
             .social-links {
                 gap: 10px;
                 justify-content: center;
@@ -1241,6 +1321,11 @@
 
             .interest-item img {
                 width: 100%;
+            }
+
+            .interest-header-row {
+                flex-direction: column;
+                align-items: stretch;
             }
 
             .skill-icon {
@@ -1391,6 +1476,25 @@
 
             <div class="bio-separator"></div>
 
+            <div class="profile-meta-grid">
+                <section class="meta-block">
+                    <h3 class="meta-title">Weekly hotspots</h3>
+                    <ul class="hotspot-list">
+                        <li><strong>Night city edits</strong><span>Mon + Wed</span></li>
+                        <li><strong>Character clips</strong><span>Thu</span></li>
+                        <li><strong>Music update drops</strong><span>Fri</span></li>
+                    </ul>
+                </section>
+                <section class="meta-block">
+                    <h3 class="meta-title">Timeline</h3>
+                    <ul class="timeline-list">
+                        <li><strong>2024</strong><span>Started building wolf.lol</span></li>
+                        <li><strong>2025</strong><span>Added custom music player + tabs</span></li>
+                        <li><strong>2026</strong><span>Current profile revamp phase</span></li>
+                    </ul>
+                </section>
+            </div>
+
             <div class="profile-footer">
 
                 <div class="social-links">
@@ -1467,17 +1571,38 @@
                 <button id="more-interests-back" class="subview-back" type="button">Back</button>
                 <h2 class="skills-title">Interests - Movies/Shows</h2>
                 <div class="interest-list">
-                    <div class="interest-tabs" role="tablist" aria-label="Movie and show interests">
-                        <button class="interest-tab active" data-interest="beastars" role="tab" aria-selected="true">Beastars</button>
-                        <button class="interest-tab" data-interest="fantastic-mr-fox" role="tab" aria-selected="false">Fantastic Mr. Fox</button>
-                        <button class="interest-tab" data-interest="the-bad-guys-1" role="tab" aria-selected="false">The Bad Guys (1)</button>
-                        <button class="interest-tab" data-interest="the-bad-guys-2" role="tab" aria-selected="false">The Bad Guys (2)</button>
+                    <div class="interest-header-row">
+                        <div class="interest-tabs" role="tablist" aria-label="Movie and show interests">
+                            <button class="interest-tab active" data-interest="beastars" role="tab" aria-selected="true">Beastars</button>
+                            <button class="interest-tab" data-interest="fantastic-mr-fox" role="tab" aria-selected="false">Fantastic Mr. Fox</button>
+                            <button class="interest-tab" data-interest="the-bad-guys-1" role="tab" aria-selected="false">The Bad Guys (1)</button>
+                            <button class="interest-tab" data-interest="the-bad-guys-2" role="tab" aria-selected="false">The Bad Guys (2)</button>
+                        </div>
+                        <button id="interests-next-button" class="subview-back interest-next-button" type="button">Next</button>
                     </div>
                     <div class="interest-item">
                         <img id="interest-image" src="https://upload.wikimedia.org/wikipedia/en/thumb/e/e1/BEASTARS%2C_volume_1.jpg/250px-BEASTARS%2C_volume_1.jpg" alt="Beastars poster art">
                         <div class="interest-copy">
                             <h3 id="interest-name">Beastars</h3>
                             <p id="interest-description">In this anthropomorphic world, gentle wolf Legoshi struggles with instinct, identity, and love after a classmate's murder deepens the divide between carnivores and herbivores at Cherryton Academy.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div id="more-interests-characters-view" class="more-view hidden">
+                <button id="more-interests-characters-back" class="subview-back" type="button">Back</button>
+                <h2 class="skills-title">Interests - Characters</h2>
+                <div class="interest-list">
+                    <div class="interest-tabs" role="tablist" aria-label="Character interests">
+                        <button class="character-tab interest-tab active" data-character="mr-wolf" role="tab" aria-selected="true">Mr. Wolf</button>
+                        <button class="character-tab interest-tab" data-character="legoshi" role="tab" aria-selected="false">Legoshi</button>
+                        <button class="character-tab interest-tab" data-character="jack" role="tab" aria-selected="false">Jack</button>
+                    </div>
+                    <div class="interest-item">
+                        <img id="character-image" src="https://upload.wikimedia.org/wikipedia/en/thumb/0/00/The_Bad_Guys_poster.jpeg/250px-The_Bad_Guys_poster.jpeg" alt="Mr. Wolf from The Bad Guys">
+                        <div class="interest-copy">
+                            <h3 id="character-name">Mr. Wolf</h3>
+                            <p id="character-description">A smooth-talking planner who can run a whole heist but still keeps his crew together with loyalty, confidence, and real growth when things get personal.</p>
                         </div>
                     </div>
                 </div>
