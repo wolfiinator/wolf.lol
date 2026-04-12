@@ -456,13 +456,44 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  function transitionView(fromNode, toNode, options = {}) {
+    const outY = options.outY ?? -8;
+    const inY = options.inY ?? 8;
+    const outDuration = options.outDuration ?? 0.2;
+    const inDuration = options.inDuration ?? 0.28;
+
+    if (!toNode || fromNode === toNode) return;
+
+    const showTarget = () => {
+      toNode.classList.remove('hidden');
+      gsap.fromTo(
+        toNode,
+        { autoAlpha: 0, y: inY },
+        { autoAlpha: 1, y: 0, duration: inDuration, ease: 'power2.out' }
+      );
+    };
+
+    if (!fromNode || fromNode.classList.contains('hidden')) {
+      showTarget();
+      return;
+    }
+
+    gsap.to(fromNode, {
+      autoAlpha: 0,
+      y: outY,
+      duration: outDuration,
+      ease: 'power2.in',
+      onComplete: () => {
+        fromNode.classList.add('hidden');
+        fromNode.style.opacity = '';
+        fromNode.style.transform = '';
+        showTarget();
+      }
+    });
+  }
+
   function showMusicArtistList() {
-    if (musicArtistSelectView) {
-      musicArtistSelectView.classList.remove('hidden');
-    }
-    if (musicArtistPlayerView) {
-      musicArtistPlayerView.classList.add('hidden');
-    }
+    transitionView(musicArtistPlayerView, musicArtistSelectView, { outY: -8, inY: 8, outDuration: 0.18, inDuration: 0.26 });
     activeArtistIndex = -1;
   }
 
@@ -472,13 +503,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (musicArtistHeading) {
       musicArtistHeading.textContent = customArtists[artistIndex].name;
     }
-    if (musicArtistSelectView) {
-      musicArtistSelectView.classList.add('hidden');
-    }
-    if (musicArtistPlayerView) {
-      musicArtistPlayerView.classList.remove('hidden');
-      gsap.fromTo(musicArtistPlayerView, { autoAlpha: 0, y: 8 }, { autoAlpha: 1, y: 0, duration: 0.26, ease: 'power2.out' });
-    }
+    transitionView(musicArtistSelectView, musicArtistPlayerView, { outY: -8, inY: 8, outDuration: 0.18, inDuration: 0.26 });
     renderTrackList();
     updateActiveTrackUI();
   }
@@ -500,6 +525,54 @@ document.addEventListener('DOMContentLoaded', async () => {
       button.addEventListener('click', () => showMusicArtistPlayer(artist.index));
       musicArtistListNode.appendChild(button);
     });
+  }
+
+  function initializeSmoothClickFeedback() {
+    const interactiveSelector = [
+      'button',
+      '.theme-button',
+      '.social-link-btn',
+      '.badge',
+      '.interest-tab',
+      '.music-track-button',
+      '.music-artist-card',
+      '#volume-icon',
+      '#mini-play-pause',
+      '#mini-prev',
+      '#mini-next'
+    ].join(', ');
+
+    const bound = new WeakSet();
+
+    const bindNode = (node) => {
+      if (!(node instanceof HTMLElement) || bound.has(node)) return;
+      bound.add(node);
+      node.classList.add('smooth-clickable');
+
+      node.addEventListener('pointerdown', () => {
+        node.classList.add('is-pressed');
+        gsap.to(node, { scale: 0.97, duration: 0.12, ease: 'power2.out', overwrite: 'auto' });
+      });
+
+      const release = () => {
+        node.classList.remove('is-pressed');
+        gsap.to(node, { scale: 1, duration: 0.22, ease: 'power2.out', overwrite: 'auto' });
+      };
+
+      node.addEventListener('pointerup', release);
+      node.addEventListener('pointerleave', release);
+      node.addEventListener('pointercancel', release);
+      node.addEventListener('blur', release);
+    };
+
+    const bindAll = () => {
+      document.querySelectorAll(interactiveSelector).forEach(bindNode);
+    };
+
+    bindAll();
+
+    const observer = new MutationObserver(() => bindAll());
+    observer.observe(document.body, { childList: true, subtree: true });
   }
 
   function playCustomTrack(index) {
@@ -1128,6 +1201,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   updateInterestTab('beastars');
   renderArtistList();
   showMusicArtistList();
+  initializeSmoothClickFeedback();
   refreshPlayPauseButton();
   refreshLoopButton();
 
