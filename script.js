@@ -159,18 +159,18 @@ document.addEventListener('DOMContentLoaded', () => {
 
   function parseCustomPlayerManifest() {
     if (!customPlayerManifestNode) {
-      return { artists: [] };
+      return { artists: [], remoteManifest: '' };
     }
 
     try {
       const parsed = JSON.parse(customPlayerManifestNode.textContent);
       if (!Array.isArray(parsed?.artists)) {
-        return { artists: [] };
+        return { artists: [], remoteManifest: '' };
       }
       return parsed;
     } catch (err) {
       console.error('Failed to parse custom player manifest:', err);
-      return { artists: [] };
+      return { artists: [], remoteManifest: '' };
     }
   }
 
@@ -264,26 +264,33 @@ document.addEventListener('DOMContentLoaded', () => {
     playTrackForTheme(document.body.classList[0] || 'home-theme');
   }
 
-  async function loadDriveMusicManifest() {
-    try {
-      const response = await fetch('music/drive_manifest.json', { cache: 'no-store' });
-      if (!response.ok) {
+  async function loadDriveMusicManifest(remoteManifestUrl = '') {
+    const candidateManifests = [remoteManifestUrl, 'music/drive_manifest.json'].filter(Boolean);
+
+    for (const manifestUrl of candidateManifests) {
+      try {
+        const response = await fetch(manifestUrl, { cache: 'no-store' });
+        if (!response.ok) {
+          continue;
+        }
+
+        const parsed = await response.json();
+        if (!Array.isArray(parsed?.artists) || parsed.artists.length === 0) {
+          continue;
+        }
+
+        appendCustomArtists(parsed.artists);
+        driveManifestLoaded = true;
+        applyDriveThemeManifest(parsed);
+        renderArtistList();
+        if (activeArtistIndex >= 0) {
+          renderTrackList();
+          updateActiveTrackUI();
+        }
         return;
+      } catch (err) {
+        console.error(`Failed to load music manifest from ${manifestUrl}:`, err);
       }
-      const parsed = await response.json();
-      if (!Array.isArray(parsed?.artists) || parsed.artists.length === 0) {
-        return;
-      }
-      appendCustomArtists(parsed.artists);
-      driveManifestLoaded = true;
-      applyDriveThemeManifest(parsed);
-      renderArtistList();
-      if (activeArtistIndex >= 0) {
-        renderTrackList();
-        updateActiveTrackUI();
-      }
-    } catch (err) {
-      console.error('Failed to load drive music manifest:', err);
     }
   }
 
@@ -493,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (customArtists.length === 0) {
       musicArtistListNode.textContent = driveManifestLoaded
         ? 'No artists configured yet.'
-        : 'No artists configured yet. Run `python3 scripts/sync_drive_music.py` to import from Google Drive.';
+        : 'No artists configured yet. Add artists in `custom-player-manifest` or set `remoteManifest` to a public JSON link.';
       return;
     }
 
@@ -1123,7 +1130,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   updateInterestTab('beastars');
   renderArtistList();
-  loadDriveMusicManifest();
+  loadDriveMusicManifest(customMusicManifest.remoteManifest);
   showMusicArtistList();
   refreshPlayPauseButton();
   refreshLoopButton();
