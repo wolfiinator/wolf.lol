@@ -516,6 +516,18 @@
             line-height: 1.5;
             margin-bottom: 10px;
             opacity: 1 !important;
+            transition: opacity 0.35s ease, transform 0.35s ease;
+            min-height: 1.6em;
+        }
+
+        #profile-name.typing-active,
+        #profile-bio.typing-active {
+            white-space: pre-line;
+        }
+
+        #profile-bio.is-swapping {
+            opacity: 0.45 !important;
+            transform: translateY(-4px);
         }
 
         .profile-meta-grid {
@@ -1148,6 +1160,74 @@
             text-align: center;
         }
 
+        body.minimalist-mode {
+            background: #030405;
+            color: rgba(232, 232, 232, 0.93);
+            font-family: "Courier New", monospace;
+        }
+
+        body.minimalist-mode * {
+            font-family: "Courier New", monospace !important;
+            text-shadow: none !important;
+            box-shadow: none !important;
+            animation: none !important;
+            transition-duration: 0.18s !important;
+        }
+
+        body.minimalist-mode #background,
+        body.minimalist-mode .glitch-overlay,
+        body.minimalist-mode #hacker-overlay,
+        body.minimalist-mode #snow-overlay,
+        body.minimalist-mode .theme-loop-indicator,
+        body.minimalist-mode .profile-container,
+        body.minimalist-mode .badge-box {
+            display: none !important;
+        }
+
+        body.minimalist-mode #profile-block,
+        body.minimalist-mode #skills-block {
+            background: rgba(15, 17, 20, 0.68) !important;
+            border: 1px solid rgba(198, 198, 198, 0.2) !important;
+            border-radius: 0 !important;
+            backdrop-filter: none !important;
+        }
+
+        body.minimalist-mode #profile-name {
+            font-size: 40px;
+            letter-spacing: 1px;
+            color: rgba(240, 240, 240, 0.95);
+        }
+
+        body.minimalist-mode #profile-clock,
+        body.minimalist-mode #profile-bio,
+        body.minimalist-mode .meta-title,
+        body.minimalist-mode .status-line,
+        body.minimalist-mode .skills-title {
+            color: rgba(190, 190, 190, 0.75);
+        }
+
+        body.minimalist-mode .meta-block,
+        body.minimalist-mode .visitor-counter,
+        body.minimalist-mode .social-link-btn,
+        body.minimalist-mode .results-toggle,
+        body.minimalist-mode .more-option,
+        body.minimalist-mode .subview-back,
+        body.minimalist-mode .interest-item,
+        body.minimalist-mode .music-player-panel {
+            background: rgba(127, 127, 127, 0.12) !important;
+            border-color: rgba(187, 187, 187, 0.28) !important;
+        }
+
+        body.minimalist-mode #music-cover,
+        body.minimalist-mode #interest-image,
+        body.minimalist-mode #character-image {
+            display: none !important;
+        }
+
+        body.minimalist-mode .music-player-panel {
+            grid-template-columns: 1fr;
+        }
+
         
         @media (max-width: 430px) {
             
@@ -1473,6 +1553,7 @@
                 <div class="more-options">
                     <button id="open-more-music" class="more-option" type="button">Music Player</button>
                     <button id="open-more-interests" class="more-option" type="button">Interests</button>
+                    <button id="toggle-minimalist-mode" class="more-option" type="button">Minimalist Mode: Off</button>
                 </div>
             </div>
             <div id="more-music-view" class="more-view hidden">

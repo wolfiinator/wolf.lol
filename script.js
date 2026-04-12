@@ -63,6 +63,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   const musicArtistBackButton = document.getElementById('music-artist-back');
   const openMoreMusicButton = document.getElementById('open-more-music');
   const openMoreInterestsButton = document.getElementById('open-more-interests');
+  const minimalistModeToggleButton = document.getElementById('toggle-minimalist-mode');
   const moreMusicBackButton = document.getElementById('more-music-back');
   const moreInterestsBackButton = document.getElementById('more-interests-back');
   const moreInterestsCharactersBackButton = document.getElementById('more-interests-characters-back');
@@ -285,6 +286,19 @@ document.addEventListener('DOMContentLoaded', async () => {
   let activeCustomTrackIndex = -1;
   let activeArtistIndex = -1;
 
+
+  const MINIMALIST_STORAGE_KEY = 'wolf_minimalist_mode';
+  let isMinimalistModeEnabled = localStorage.getItem(MINIMALIST_STORAGE_KEY) === 'true';
+
+  function applyMinimalistMode(enabled) {
+    isMinimalistModeEnabled = enabled;
+    document.body.classList.toggle('minimalist-mode', enabled);
+    if (minimalistModeToggleButton) {
+      minimalistModeToggleButton.textContent = `Minimalist Mode: ${enabled ? 'On' : 'Off'}`;
+    }
+  }
+
+  applyMinimalistMode(isMinimalistModeEnabled);
 
   const startMessage = "wolf.lol";
   let startTextContent = '';
@@ -632,13 +646,18 @@ document.addEventListener('DOMContentLoaded', async () => {
       console.error("Failed to play music after start screen click:", err);
     });
     profileBlock.classList.remove('hidden');
-    gsap.fromTo(profileBlock,
-      { opacity: 0, y: -50 },
-      { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
-        profileBlock.classList.add('profile-appear');
-        
-      }}
-    );
+    if (isMinimalistModeEnabled) {
+      profileBlock.style.opacity = '1';
+      profileBlock.style.transform = 'translate(-50%, -50%)';
+      profileBlock.classList.add('profile-appear');
+    } else {
+      gsap.fromTo(profileBlock,
+        { opacity: 0, y: -50 },
+        { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
+          profileBlock.classList.add('profile-appear');
+        }}
+      );
+    }
     if (!isTouchDevice && !prefersReducedMotion) {
       try {
         new cursorTrailEffect({
@@ -662,13 +681,52 @@ document.addEventListener('DOMContentLoaded', async () => {
   }, { passive: false });
 
 
-  function typeWriterName() {
-    profileName.textContent = 'wolf.';
+  function delay(ms) {
+    return new Promise((resolve) => setTimeout(resolve, ms));
+  }
+
+  async function typeWriterName() {
+    const username = 'wolf.';
+    profileName.classList.add('typing-active');
+
+    while (true) {
+      for (let i = 1; i <= username.length; i += 1) {
+        profileName.textContent = `${username.slice(0, i)}|`;
+        await delay(95);
+      }
+      await delay(900);
+      for (let i = username.length - 1; i >= 0; i -= 1) {
+        profileName.textContent = `${username.slice(0, i)}|`;
+        await delay(75);
+      }
+      await delay(250);
+    }
   }
 
 
-  function typeWriterBio() {
-    profileBio.innerHTML = 'the best oat.<br>love yall.';
+  async function typeWriterBio() {
+    const bios = ['the best oat.', 'love yall.'];
+    let activeBioIndex = 0;
+    profileBio.classList.add('typing-active');
+
+    while (true) {
+      const currentBio = bios[activeBioIndex];
+      for (let i = 1; i <= currentBio.length; i += 1) {
+        profileBio.textContent = `${currentBio.slice(0, i)}|`;
+        await delay(60);
+      }
+      profileBio.textContent = currentBio;
+      await delay(1300);
+      profileBio.classList.add('is-swapping');
+      await delay(220);
+      for (let i = currentBio.length - 1; i >= 0; i -= 1) {
+        profileBio.textContent = `${currentBio.slice(0, i)}|`;
+        await delay(35);
+      }
+      profileBio.classList.remove('is-swapping');
+      activeBioIndex = (activeBioIndex + 1) % bios.length;
+      await delay(150);
+    }
   }
 
 
@@ -905,7 +963,7 @@ document.addEventListener('DOMContentLoaded', async () => {
   function scheduleTilt(stateKey, e, element) {
     const state = tiltState[stateKey];
     state.event = e;
-    if (state.scheduled || prefersReducedMotion || isCoarsePointer) return;
+    if (state.scheduled || prefersReducedMotion || isCoarsePointer || isMinimalistModeEnabled) return;
     state.scheduled = true;
     requestAnimationFrame(() => {
       state.scheduled = false;
@@ -980,7 +1038,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     lastOrbitTime = now;
     const speed = now < orbitBoostUntil ? orbitSpeed * 3 : orbitSpeed;
     orbitAngle = (orbitAngle + speed * elapsed) % 360;
-    profileContainer.style.setProperty('--orbit-angle', orbitAngle.toFixed(3));
+    if (!isMinimalistModeEnabled) {
+      profileContainer.style.setProperty('--orbit-angle', orbitAngle.toFixed(3));
+    }
     requestAnimationFrame(tickOrbit);
   }
 
@@ -1100,6 +1160,14 @@ document.addEventListener('DOMContentLoaded', async () => {
 
   if (openMoreInterestsButton) {
     openMoreInterestsButton.addEventListener('click', () => showMoreSubview(moreInterestsView));
+  }
+
+  if (minimalistModeToggleButton) {
+    minimalistModeToggleButton.addEventListener('click', () => {
+      const nextMode = !isMinimalistModeEnabled;
+      applyMinimalistMode(nextMode);
+      localStorage.setItem(MINIMALIST_STORAGE_KEY, String(nextMode));
+    });
   }
 
   if (moreMusicBackButton) {
