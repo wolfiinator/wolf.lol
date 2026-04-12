@@ -1,6 +1,22 @@
 {
   "artists": [
     {
+      "name": "aimware, novoline, kxrrvpt",
+      "folder": "music/aimware, novoline, kxrrvpt",
+      "tracks": [
+        {
+          "file": "someday/someday..mp3",
+          "title": "someday",
+          "cover": "someday/Screenshot 2026-04-12 043259.png"
+        },
+        {
+          "file": "these eyes will be/these eyes will be..mp3",
+          "title": "these eyes will be",
+          "cover": "these eyes will be/Screenshot 2026-04-12 043259.png"
+        }
+      ]
+    },
+    {
       "name": "montell fish",
       "folder": "music/montell fish",
       "tracks": [
