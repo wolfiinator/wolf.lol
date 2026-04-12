@@ -36,7 +36,10 @@
         }
 
         body.video-fallback {
-            background: radial-gradient(circle at 20% 20%, #14213d 0%, #0b132b 45%, #000 100%);
+            background:
+                linear-gradient(rgba(0, 0, 0, 0.45), rgba(0, 0, 0, 0.75)),
+                url('assets/profile.gif') center / cover no-repeat fixed,
+                radial-gradient(circle at 20% 20%, #14213d 0%, #0b132b 45%, #000 100%);
         }
 
         .container {
@@ -879,7 +882,7 @@
 
     <div class="container">
         
-        <video id="background" autoplay loop muted playsinline webkit-playsinline>
+        <video id="background" autoplay loop muted playsinline webkit-playsinline poster="assets/profile.gif">
             <source src="assets/background.mp4" type="video/mp4">
         </video>
 

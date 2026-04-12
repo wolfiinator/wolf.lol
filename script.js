@@ -14,6 +14,7 @@ function initMedia() {
 
   const applyVideoFallback = () => {
     document.body.classList.add('video-fallback');
+    backgroundVideo.classList.add('hidden');
   };
   backgroundVideo.addEventListener('error', applyVideoFallback);
   const backgroundSource = backgroundVideo.querySelector('source');
