@@ -10,10 +10,21 @@ function initMedia() {
   }
   backgroundMusic.volume = 0.3;
   backgroundVideo.muted = true; 
+  backgroundVideo.loop = true;
+
+  const applyVideoFallback = () => {
+    document.body.classList.add('video-fallback');
+  };
+  backgroundVideo.addEventListener('error', applyVideoFallback);
+  const backgroundSource = backgroundVideo.querySelector('source');
+  if (backgroundSource) {
+    backgroundSource.addEventListener('error', applyVideoFallback);
+  }
 
   
   backgroundVideo.play().catch(err => {
     console.error("Failed to play background video:", err);
+    applyVideoFallback();
   });
 }
 
@@ -95,7 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  const startMessage = "Click here to see the motion baby";
+  const startMessage = "wolf.lol";
   let startTextContent = '';
   let startIndex = 0;
   let startCursorVisible = true;
@@ -119,10 +130,14 @@ document.addEventListener('DOMContentLoaded', () => {
   function initializeVisitorCounter() {
     let totalVisitors = localStorage.getItem('totalVisitorCount');
     if (!totalVisitors) {
-      totalVisitors = 921234;
+      totalVisitors = 7928;
       localStorage.setItem('totalVisitorCount', totalVisitors);
     } else {
       totalVisitors = parseInt(totalVisitors);
+      if (Number.isNaN(totalVisitors) || totalVisitors > 50000 || totalVisitors < 7928) {
+        totalVisitors = 7928;
+        localStorage.setItem('totalVisitorCount', totalVisitors);
+      }
     }
 
     const hasVisited = localStorage.getItem('hasVisited');
@@ -201,7 +216,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  const name = "JAQLIV";
+  const name = "wolf.";
   let nameText = '';
   let nameIndex = 0;
   let isNameDeleting = false;
@@ -236,8 +251,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   const bioMessages = [
-    "Fu*k Guns.lol & Fakecrime.bio got banned too often, so I created my own.",
-    "\"Hello, World!\""
+    "love yall.",
+    "the best oat."
   ];
   let bioText = '';
   let bioIndex = 0;
@@ -275,6 +290,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   let currentAudio = backgroundMusic;
+  backgroundMusic.muted = true;
+  backgroundMusic.play().catch(err => {
+    console.error("Autoplay was blocked:", err);
+  });
   let isMuted = false;
 
   volumeIcon.addEventListener('click', () => {
