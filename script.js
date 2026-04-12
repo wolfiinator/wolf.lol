@@ -2,13 +2,13 @@ let hasUserInteracted = false;
 
 function initMedia() {
   console.log("initMedia called");
-  const backgroundMusic = document.getElementById('background-music');
+  const musicPlayer = document.getElementById('music-player');
   const backgroundVideo = document.getElementById('background');
-  if (!backgroundMusic || !backgroundVideo) {
+  if (!musicPlayer || !backgroundVideo) {
     console.error("Media elements not found");
     return;
   }
-  backgroundMusic.volume = 0.3;
+  musicPlayer.volume = 0.3;
   backgroundVideo.muted = true; 
   backgroundVideo.loop = true;
 
@@ -34,11 +34,8 @@ document.addEventListener('DOMContentLoaded', () => {
   const profileName = document.getElementById('profile-name');
   const profileBio = document.getElementById('profile-bio');
   const visitorCount = document.getElementById('visitor-count');
-  const backgroundMusic = document.getElementById('background-music');
-  const hackerMusic = document.getElementById('hacker-music');
-  const rainMusic = document.getElementById('rain-music');
-  const animeMusic = document.getElementById('anime-music');
-  const carMusic = document.getElementById('car-music');
+  const musicPlayer = document.getElementById('music-player');
+  const musicManifestNode = document.getElementById('music-manifest');
   const homeButton = document.getElementById('home-theme');
   const hackerButton = document.getElementById('hacker-theme');
   const rainButton = document.getElementById('rain-theme');
@@ -92,6 +89,47 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   
+  const fallbackManifest = {
+    folder: 'assets',
+    tracks: [
+      { name: 'Background', file: 'background_music.mp3', theme: 'home-theme' },
+      { name: 'Hacker', file: 'hacker_music.mp3', theme: 'hacker-theme' },
+      { name: 'Rain', file: 'rain_music.mp3', theme: 'rain-theme' },
+      { name: 'Anime', file: 'anime_music.mp3', theme: 'anime-theme' },
+      { name: 'Car', file: 'car_music.mp3', theme: 'car-theme' }
+    ]
+  };
+
+  function parseMusicManifest() {
+    if (!musicManifestNode) {
+      return fallbackManifest;
+    }
+
+    try {
+      const parsed = JSON.parse(musicManifestNode.textContent);
+      if (!Array.isArray(parsed?.tracks) || parsed.tracks.length === 0) {
+        return fallbackManifest;
+      }
+      return parsed;
+    } catch (err) {
+      console.error('Failed to parse music manifest:', err);
+      return fallbackManifest;
+    }
+  }
+
+  const musicManifest = parseMusicManifest();
+
+  function resolveTrackSrc(track) {
+    const folder = (musicManifest.folder || 'assets').replace(/\/$/, '');
+    return `${folder}/${track.file}`;
+  }
+
+  function findTrackByTheme(themeClass) {
+    const themedTrack = musicManifest.tracks.find((track) => track.theme === themeClass);
+    return themedTrack || musicManifest.tracks[0];
+  }
+
+
   const cursor = document.querySelector('.custom-cursor');
   const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
@@ -192,8 +230,8 @@ document.addEventListener('DOMContentLoaded', () => {
 
   startScreen.addEventListener('click', () => {
     startScreen.classList.add('hidden');
-    backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
+    currentAudio.muted = false;
+    currentAudio.play().catch(err => {
       console.error("Failed to play music after start screen click:", err);
     });
     profileBlock.classList.remove('hidden');
@@ -223,8 +261,8 @@ document.addEventListener('DOMContentLoaded', () => {
   startScreen.addEventListener('touchstart', (e) => {
     e.preventDefault();
     startScreen.classList.add('hidden');
-    backgroundMusic.muted = false;
-    backgroundMusic.play().catch(err => {
+    currentAudio.muted = false;
+    currentAudio.play().catch(err => {
       console.error("Failed to play music after start screen touch:", err);
     });
     profileBlock.classList.remove('hidden');
@@ -325,12 +363,28 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 500);
 
 
-  let currentAudio = backgroundMusic;
-  backgroundMusic.muted = true;
-  backgroundMusic.play().catch(err => {
-    console.error("Autoplay was blocked:", err);
-  });
+  let currentAudio = musicPlayer;
+
+  function playTrackForTheme(themeClass) {
+    const track = findTrackByTheme(themeClass);
+    if (!track) {
+      return;
+    }
+
+    const nextSrc = resolveTrackSrc(track);
+    if (!currentAudio.src.endsWith(nextSrc)) {
+      currentAudio.src = nextSrc;
+      currentAudio.load();
+    }
+
+    currentAudio.volume = volumeSlider.value;
+    currentAudio.muted = isMuted;
+    currentAudio.play().catch(err => console.error('Failed to play theme music:', err));
+  }
+
   let isMuted = false;
+  currentAudio.muted = true;
+  playTrackForTheme('home-theme');
 
   volumeIcon.addEventListener('click', () => {
     isMuted = !isMuted;
@@ -410,7 +464,7 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  function switchTheme(videoSrc, audio, themeClass, overlay = null, overlayOverProfile = false) {
+  function switchTheme(videoSrc, themeClass, overlay = null, overlayOverProfile = false) {
     let primaryColor;
     switch (themeClass) {
       case 'home-theme':
@@ -444,10 +498,7 @@ document.addEventListener('DOMContentLoaded', () => {
           currentAudio.pause();
           currentAudio.currentTime = 0;
         }
-        currentAudio = audio;
-        currentAudio.volume = volumeSlider.value;
-        currentAudio.muted = isMuted;
-        currentAudio.play().catch(err => console.error("Failed to play theme music:", err));
+        playTrackForTheme(themeClass);
 
         document.body.classList.remove('home-theme', 'hacker-theme', 'rain-theme', 'anime-theme', 'car-theme');
         document.body.classList.add(themeClass);
@@ -476,43 +527,43 @@ document.addEventListener('DOMContentLoaded', () => {
 
 
   homeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', backgroundMusic, 'home-theme');
+    switchTheme('assets/background.mp4', 'home-theme');
   });
   homeButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', backgroundMusic, 'home-theme');
+    switchTheme('assets/background.mp4', 'home-theme');
   });
 
   hackerButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
+    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
   });
   hackerButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', hackerMusic, 'hacker-theme', hackerOverlay, false);
+    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
   });
 
   rainButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', rainMusic, 'rain-theme', snowOverlay, true);
+    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
   });
   rainButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', rainMusic, 'rain-theme', snowOverlay, true);
+    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
   });
 
   animeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', animeMusic, 'anime-theme');
+    switchTheme('assets/background.mp4', 'anime-theme');
   });
   animeButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', animeMusic, 'anime-theme');
+    switchTheme('assets/background.mp4', 'anime-theme');
   });
 
   carButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', carMusic, 'car-theme');
+    switchTheme('assets/background.mp4', 'car-theme');
   });
   carButton.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    switchTheme('assets/background.mp4', carMusic, 'car-theme');
+    switchTheme('assets/background.mp4', 'car-theme');
   });
 
  

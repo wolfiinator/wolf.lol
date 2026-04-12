@@ -1031,21 +1031,19 @@
     </div>
 
 
-    <audio id="background-music" loop>
-        <source src="assets/background_music.mp3" type="audio/mp3">
-    </audio>
-    <audio id="hacker-music" loop muted>
-        <source src="assets/hacker_music.mp3" type="audio/mp3">
-    </audio>
-    <audio id="rain-music" loop muted>
-        <source src="assets/rain_music.mp3" type="audio/mp3">
-    </audio>
-    <audio id="anime-music" loop muted>
-        <source src="assets/anime_music.mp3" type="audio/mp3">
-    </audio>
-    <audio id="car-music" loop muted>
-        <source src="assets/car_music.mp3" type="audio/mp3">
-    </audio>
+    <script id="music-manifest" type="application/json">
+        {
+            "folder": "assets/music",
+            "tracks": [
+                { "name": "Home", "file": "background_music.mp3", "theme": "home-theme" },
+                { "name": "Hacker", "file": "hacker_music.mp3", "theme": "hacker-theme" },
+                { "name": "Rain", "file": "rain_music.mp3", "theme": "rain-theme" },
+                { "name": "Anime", "file": "anime_music.mp3", "theme": "anime-theme" },
+                { "name": "Car", "file": "car_music.mp3", "theme": "car-theme" }
+            ]
+        }
+    </script>
+    <audio id="music-player" loop preload="metadata"></audio>
 
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
