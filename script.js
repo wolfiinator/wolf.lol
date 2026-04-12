@@ -107,6 +107,8 @@ document.addEventListener('DOMContentLoaded', () => {
   };
 
   
+  const themeClasses = ['home-theme', 'hacker-theme', 'rain-theme', 'anime-theme', 'car-theme'];
+
   const fallbackManifest = {
     folder: 'assets',
     tracks: [
@@ -135,11 +137,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
   }
 
-  const musicManifest = parseMusicManifest();
+  let musicManifest = parseMusicManifest();
 
   function resolveTrackSrc(track) {
-    const folder = (musicManifest.folder || 'assets').replace(/\/$/, '');
-    return `${folder}/${track.file}`;
+    if (!track) return '';
+    if (track.src) return track.src;
+
+    const file = track.file || '';
+    if (/^https?:\/\//i.test(file)) {
+      return file;
+    }
+
+    const folder = (track.folder ?? musicManifest.folder ?? 'assets').replace(/\/$/, '');
+    return folder ? `${folder}/${file}` : file;
   }
 
   function findTrackByTheme(themeClass) {
@@ -193,6 +203,41 @@ document.addEventListener('DOMContentLoaded', () => {
     });
   }
 
+  function applyDriveThemeManifest(manifest) {
+    const flattenedTracks = [];
+
+    (manifest.artists || []).forEach((artist) => {
+      const folder = (artist.folder || '').replace(/\/$/, '');
+      (artist.tracks || []).forEach((trackFile) => {
+        const source = /^https?:\/\//i.test(trackFile)
+          ? trackFile
+          : (folder ? `${folder}/${trackFile}` : trackFile);
+        flattenedTracks.push({
+          name: decodeURIComponent(trackFile).split('/').pop().replace(/\.[^.]+$/, ''),
+          src: source
+        });
+      });
+    });
+
+    if (flattenedTracks.length === 0) {
+      return;
+    }
+
+    musicManifest = {
+      folder: '',
+      tracks: themeClasses.map((themeClass, index) => ({
+        ...flattenedTracks[index % flattenedTracks.length],
+        theme: themeClass
+      }))
+    };
+
+    if (currentAudio && !albumPlayer?.paused) {
+      return;
+    }
+
+    playTrackForTheme(document.body.classList[0] || 'home-theme');
+  }
+
   async function loadDriveMusicManifest() {
     try {
       const response = await fetch('music/drive_manifest.json', { cache: 'no-store' });
@@ -204,6 +249,7 @@ document.addEventListener('DOMContentLoaded', () => {
         return;
       }
       appendCustomArtists(parsed.artists);
+      applyDriveThemeManifest(parsed);
       renderArtistList();
       if (activeArtistIndex >= 0) {
         renderTrackList();
@@ -284,14 +330,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
   async function initializeVisitorCounter() {
     const fallbackBase = 7922;
+    const counterNamespace = 'wolf-lol';
+    const counterKey = 'profile-views';
+    const storageKey = 'wolf-visitor-counted-date';
+    const todayKey = new Date().toISOString().slice(0, 10);
+
     try {
-      const response = await fetch('https://api.countapi.xyz/hit/wolf-lol/profile-views', { cache: 'no-store' });
+      const shouldIncrement = localStorage.getItem(storageKey) !== todayKey;
+      const endpoint = shouldIncrement
+        ? `https://api.countapi.xyz/hit/${counterNamespace}/${counterKey}`
+        : `https://api.countapi.xyz/get/${counterNamespace}/${counterKey}`;
+      const response = await fetch(endpoint, { cache: 'no-store' });
       if (!response.ok) {
         throw new Error(`Count API failed with ${response.status}`);
       }
+
       const data = await response.json();
       const count = Number.isFinite(data?.value) ? data.value : fallbackBase;
       visitorCount.textContent = count.toLocaleString();
+
+      if (shouldIncrement) {
+        localStorage.setItem(storageKey, todayKey);
+      }
     } catch (error) {
       console.error('Failed to load remote visitor count:', error);
       visitorCount.textContent = fallbackBase.toLocaleString();
