@@ -48,11 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const musicPlayPauseButton = document.getElementById('music-play-pause');
   const musicNextButton = document.getElementById('music-next');
   const musicLoopButton = document.getElementById('music-loop');
-  const homeButton = document.getElementById('home-theme');
-  const hackerButton = document.getElementById('hacker-theme');
-  const rainButton = document.getElementById('rain-theme');
-  const animeButton = document.getElementById('anime-theme');
-  const carButton = document.getElementById('car-theme');
+  const musicEqualizer = document.getElementById('music-equalizer');
   const resultsButtons = document.querySelectorAll('.results-toggle');
   const profileClock = document.getElementById('profile-clock');
   const volumeIcon = document.getElementById('volume-icon');
@@ -66,7 +62,7 @@ document.addEventListener('DOMContentLoaded', () => {
   const skillsBlock = document.getElementById('skills-block');
   const profilePicture = document.querySelector('.profile-picture');
   const profileContainer = document.querySelector('.profile-container');
-  const socialIcons = document.querySelectorAll('.social-icon');
+  const socialIcons = document.querySelectorAll('.social-link-btn');
   const badges = document.querySelectorAll('.badge');
   const interestTabs = document.querySelectorAll('.interest-tab');
   const interestImage = document.getElementById('interest-image');
@@ -232,23 +228,20 @@ document.addEventListener('DOMContentLoaded', () => {
   }, 500);
 
 
-  function initializeVisitorCounter() {
-    let totalVisitors = localStorage.getItem('totalVisitorCount');
-    if (!totalVisitors) {
-      totalVisitors = 7922;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-    } else {
-      totalVisitors = parseInt(totalVisitors);
+  async function initializeVisitorCounter() {
+    const fallbackBase = 7922;
+    try {
+      const response = await fetch('https://api.countapi.xyz/hit/wolf-lol/profile-views', { cache: 'no-store' });
+      if (!response.ok) {
+        throw new Error(`Count API failed with ${response.status}`);
+      }
+      const data = await response.json();
+      const count = Number.isFinite(data?.value) ? data.value : fallbackBase;
+      visitorCount.textContent = count.toLocaleString();
+    } catch (error) {
+      console.error('Failed to load remote visitor count:', error);
+      visitorCount.textContent = fallbackBase.toLocaleString();
     }
-
-    const hasVisited = localStorage.getItem('hasVisited');
-    if (!hasVisited) {
-      totalVisitors++;
-      localStorage.setItem('totalVisitorCount', totalVisitors);
-      localStorage.setItem('hasVisited', 'true');
-    }
-
-    visitorCount.textContent = totalVisitors.toLocaleString();
   }
 
 
@@ -271,6 +264,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (!musicModal) return;
     musicModal.classList.remove('hidden');
     musicModal.setAttribute('aria-hidden', 'false');
+    updateMusicAnimations();
   }
 
   function closeMusicModal() {
@@ -287,6 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
   function refreshLoopButton() {
     if (!musicLoopButton || !albumPlayer) return;
     musicLoopButton.textContent = `Loop: ${albumPlayer.loop ? 'on' : 'off'}`;
+  }
+
+  function updateMusicAnimations() {
+    if (!albumPlayer) return;
+    const isPlaying = !albumPlayer.paused;
+    if (musicCoverNode) {
+      musicCoverNode.classList.toggle('playing', isPlaying);
+    }
+    if (musicEqualizer) {
+      musicEqualizer.classList.toggle('playing', isPlaying);
+    }
   }
 
   function renderTrackList() {
@@ -347,6 +352,7 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateActiveTrackUI();
     refreshPlayPauseButton();
+    updateMusicAnimations();
     if (currentAudio) {
       currentAudio.pause();
     }
@@ -364,7 +370,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { opacity: 0, y: -50 },
       { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
         profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
+        
       }}
     );
     if (!isTouchDevice) {
@@ -395,7 +401,7 @@ document.addEventListener('DOMContentLoaded', () => {
       { opacity: 0, y: -50 },
       { opacity: 1, y: 0, duration: 1, ease: 'power2.out', onComplete: () => {
         profileBlock.classList.add('profile-appear');
-        profileContainer.classList.add('orbit');
+        
       }}
     );
     if (!isTouchDevice) {
@@ -652,9 +658,7 @@ document.addEventListener('DOMContentLoaded', () => {
           duration: 0.5,
           ease: 'power2.out',
           onComplete: () => {
-            profileContainer.classList.remove('orbit');
-            void profileContainer.offsetWidth;
-            profileContainer.classList.add('orbit');
+            
           }
         });
       }
@@ -662,45 +666,22 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
 
-  homeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'home-theme');
-  });
-  homeButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'home-theme');
-  });
+  const autoThemes = [
+    ['home-theme', null, false],
+    ['hacker-theme', hackerOverlay, false],
+    ['rain-theme', snowOverlay, true],
+    ['anime-theme', null, false],
+    ['car-theme', null, false]
+  ];
+  let autoThemeIndex = 0;
 
-  hackerButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
-  });
-  hackerButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'hacker-theme', hackerOverlay, false);
-  });
+  function cycleTheme() {
+    autoThemeIndex = (autoThemeIndex + 1) % autoThemes.length;
+    const [themeClass, overlayNode, overProfile] = autoThemes[autoThemeIndex];
+    switchTheme('assets/background.mp4', themeClass, overlayNode, overProfile);
+  }
 
-  rainButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
-  });
-  rainButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'rain-theme', snowOverlay, true);
-  });
-
-  animeButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'anime-theme');
-  });
-  animeButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'anime-theme');
-  });
-
-  carButton.addEventListener('click', () => {
-    switchTheme('assets/background.mp4', 'car-theme');
-  });
-  carButton.addEventListener('touchstart', (e) => {
-    e.preventDefault();
-    switchTheme('assets/background.mp4', 'car-theme');
-  });
+  setInterval(cycleTheme, 18000);
 
  
   function handleTilt(e, element) {
@@ -788,29 +769,31 @@ document.addEventListener('DOMContentLoaded', () => {
   });
 
 
-  profilePicture.addEventListener('click', () => {
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
-    setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
-  });
+  let orbitAngle = 0;
+  let orbitSpeed = 110;
+  let orbitBoostUntil = 0;
+  let lastOrbitTime = performance.now();
+
+  function tickOrbit(now) {
+    const elapsed = (now - lastOrbitTime) / 1000;
+    lastOrbitTime = now;
+    const speed = now < orbitBoostUntil ? orbitSpeed * 3 : orbitSpeed;
+    orbitAngle = (orbitAngle + speed * elapsed) % 360;
+    profileContainer.style.setProperty('--orbit-angle', orbitAngle.toFixed(3));
+    requestAnimationFrame(tickOrbit);
+  }
+
+  function boostOrbit() {
+    orbitBoostUntil = performance.now() + 750;
+  }
+
+  requestAnimationFrame(tickOrbit);
+
+  profilePicture.addEventListener('click', boostOrbit);
 
   profilePicture.addEventListener('touchstart', (e) => {
     e.preventDefault();
-    profileContainer.classList.remove('fast-orbit');
-    profileContainer.classList.remove('orbit');
-    void profileContainer.offsetWidth;
-    profileContainer.classList.add('fast-orbit');
-    setTimeout(() => {
-      profileContainer.classList.remove('fast-orbit');
-      void profileContainer.offsetWidth;
-      profileContainer.classList.add('orbit');
-    }, 500);
+    boostOrbit();
   });
 
  
@@ -931,6 +914,7 @@ document.addEventListener('DOMContentLoaded', () => {
         albumPlayer.pause();
       }
       refreshPlayPauseButton();
+      updateMusicAnimations();
     });
   }
 
@@ -958,8 +942,8 @@ document.addEventListener('DOMContentLoaded', () => {
   }
 
   if (albumPlayer) {
-    albumPlayer.addEventListener('play', refreshPlayPauseButton);
-    albumPlayer.addEventListener('pause', refreshPlayPauseButton);
+    albumPlayer.addEventListener('play', () => { refreshPlayPauseButton(); updateMusicAnimations(); });
+    albumPlayer.addEventListener('pause', () => { refreshPlayPauseButton(); updateMusicAnimations(); });
     albumPlayer.addEventListener('ended', () => {
       if (customTracks.length === 0) return;
       const nextIndex = (activeCustomTrackIndex + 1) % customTracks.length;
