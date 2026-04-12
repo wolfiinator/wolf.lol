@@ -40,6 +40,8 @@ document.addEventListener('DOMContentLoaded', async () => {
   const customPlayerManifestNode = document.getElementById('custom-player-manifest');
   const openMoreButton = document.getElementById('open-more');
   const closeMoreButton = document.getElementById('close-more');
+  const minimizeProfileButton = document.getElementById('minimize-profile');
+  const maximizeProfileButton = document.getElementById('maximize-profile');
   const moreHomeView = document.getElementById('more-home-view');
   const moreMusicView = document.getElementById('more-music-view');
   const moreInterestsView = document.getElementById('more-interests-view');
@@ -78,6 +80,15 @@ document.addEventListener('DOMContentLoaded', async () => {
   const interestImage = document.getElementById('interest-image');
   const interestName = document.getElementById('interest-name');
   const interestDescription = document.getElementById('interest-description');
+  const minimizedHud = document.getElementById('minimized-hud');
+  const minimizedName = document.getElementById('minimized-name');
+  const minimizedViews = document.getElementById('minimized-views');
+  const minimizedTrack = document.getElementById('minimized-track');
+  const minimizedTrackTitle = document.getElementById('minimized-track-title');
+  const minimizedTrackTime = document.getElementById('minimized-track-time');
+  const miniPlayPauseButton = document.getElementById('mini-play-pause');
+  const miniPrevButton = document.getElementById('mini-prev');
+  const miniNextButton = document.getElementById('mini-next');
 
   const interestsContent = {
     beastars: {
@@ -305,9 +316,15 @@ document.addEventListener('DOMContentLoaded', async () => {
       const data = await response.json();
       const count = Number.isFinite(data?.value) ? data.value : fallbackBase;
       visitorCount.textContent = count.toLocaleString();
+      if (minimizedViews) {
+        minimizedViews.textContent = `views: ${visitorCount.textContent}`;
+      }
     } catch (error) {
       console.error('Failed to load remote visitor count:', error);
       visitorCount.textContent = fallbackBase.toLocaleString();
+      if (minimizedViews) {
+        minimizedViews.textContent = `views: ${visitorCount.textContent}`;
+      }
     }
   }
 
@@ -322,6 +339,9 @@ document.addEventListener('DOMContentLoaded', async () => {
       hour12: true
     });
     profileClock.textContent = `local time: ${time}`;
+    if (minimizedName && profileName) {
+      minimizedName.textContent = profileName.textContent.replace('|', '').trim() || 'wolf.';
+    }
   }
 
   updateProfileClock();
@@ -330,6 +350,9 @@ document.addEventListener('DOMContentLoaded', async () => {
   function refreshPlayPauseButton() {
     if (!musicPlayPauseButton || !albumPlayer) return;
     musicPlayPauseButton.textContent = albumPlayer.paused ? 'Play' : 'Pause';
+    if (miniPlayPauseButton) {
+      miniPlayPauseButton.textContent = albumPlayer.paused ? 'Play' : 'Pause';
+    }
   }
 
   function refreshLoopButton() {
@@ -346,6 +369,50 @@ document.addEventListener('DOMContentLoaded', async () => {
     if (musicEqualizer) {
       musicEqualizer.classList.toggle('playing', isPlaying);
     }
+  }
+
+  function formatTrackTime(rawSeconds) {
+    if (!Number.isFinite(rawSeconds) || rawSeconds < 0) return '00:00';
+    const seconds = Math.floor(rawSeconds);
+    const minutes = Math.floor(seconds / 60);
+    const remaining = seconds % 60;
+    return `${String(minutes).padStart(2, '0')}:${String(remaining).padStart(2, '0')}`;
+  }
+
+  function refreshMinimizedTrack() {
+    if (!minimizedTrack || !minimizedTrackTitle || !minimizedTrackTime || !albumPlayer) return;
+    const activeTrack = customTracks[activeCustomTrackIndex];
+    if (!activeTrack || !albumPlayer.src) {
+      minimizedTrack.classList.add('hidden');
+      return;
+    }
+    minimizedTrack.classList.remove('hidden');
+    minimizedTrackTitle.textContent = `${activeTrack.artistName} — ${activeTrack.title}`;
+    minimizedTrackTime.textContent = `${formatTrackTime(albumPlayer.currentTime)} / ${formatTrackTime(albumPlayer.duration)}`;
+  }
+
+  function enterMinimizedMode() {
+    document.body.classList.add('minimized-mode');
+    skillsBlock.classList.add('hidden');
+    profileBlock.classList.add('hidden');
+    if (minimizedName && profileName) {
+      minimizedName.textContent = profileName.textContent.replace('|', '').trim() || 'wolf.';
+    }
+    if (minimizedViews && visitorCount) {
+      minimizedViews.textContent = `views: ${visitorCount.textContent}`;
+    }
+    if (minimizedHud) {
+      minimizedHud.classList.remove('hidden');
+    }
+    refreshMinimizedTrack();
+  }
+
+  function exitMinimizedMode() {
+    document.body.classList.remove('minimized-mode');
+    if (minimizedHud) {
+      minimizedHud.classList.add('hidden');
+    }
+    profileBlock.classList.remove('hidden');
   }
 
   function renderTrackList() {
@@ -452,6 +519,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     updateActiveTrackUI();
     refreshPlayPauseButton();
     updateMusicAnimations();
+    refreshMinimizedTrack();
     if (currentAudio) {
       currentAudio.pause();
     }
@@ -981,6 +1049,14 @@ document.addEventListener('DOMContentLoaded', async () => {
     });
   }
 
+  if (minimizeProfileButton) {
+    minimizeProfileButton.addEventListener('click', enterMinimizedMode);
+  }
+
+  if (maximizeProfileButton) {
+    maximizeProfileButton.addEventListener('click', exitMinimizedMode);
+  }
+
   if (openMoreMusicButton) {
     openMoreMusicButton.addEventListener('click', () => {
       showMusicArtistList();
@@ -1068,6 +1144,7 @@ document.addEventListener('DOMContentLoaded', async () => {
       }
       refreshPlayPauseButton();
       updateMusicAnimations();
+      refreshMinimizedTrack();
     });
   }
 
@@ -1095,9 +1172,44 @@ document.addEventListener('DOMContentLoaded', async () => {
   }
 
   if (albumPlayer) {
-    albumPlayer.addEventListener('play', () => { refreshPlayPauseButton(); updateMusicAnimations(); });
-    albumPlayer.addEventListener('pause', () => { refreshPlayPauseButton(); updateMusicAnimations(); });
+    albumPlayer.addEventListener('play', () => { refreshPlayPauseButton(); updateMusicAnimations(); refreshMinimizedTrack(); });
+    albumPlayer.addEventListener('pause', () => { refreshPlayPauseButton(); updateMusicAnimations(); refreshMinimizedTrack(); });
+    albumPlayer.addEventListener('timeupdate', refreshMinimizedTrack);
+    albumPlayer.addEventListener('loadedmetadata', refreshMinimizedTrack);
+    albumPlayer.addEventListener('durationchange', refreshMinimizedTrack);
     albumPlayer.addEventListener('ended', () => {
+      if (customTracks.length === 0) return;
+      const nextIndex = (activeCustomTrackIndex + 1) % customTracks.length;
+      playCustomTrack(nextIndex);
+    });
+  }
+
+  if (miniPlayPauseButton && albumPlayer) {
+    miniPlayPauseButton.addEventListener('click', () => {
+      if (!albumPlayer.src && customTracks.length > 0) {
+        playCustomTrack(0);
+        return;
+      }
+      if (albumPlayer.paused) {
+        albumPlayer.play().catch((err) => console.error('Failed to resume custom track:', err));
+      } else {
+        albumPlayer.pause();
+      }
+      refreshPlayPauseButton();
+      refreshMinimizedTrack();
+    });
+  }
+
+  if (miniPrevButton) {
+    miniPrevButton.addEventListener('click', () => {
+      if (customTracks.length === 0) return;
+      const nextIndex = activeCustomTrackIndex <= 0 ? customTracks.length - 1 : activeCustomTrackIndex - 1;
+      playCustomTrack(nextIndex);
+    });
+  }
+
+  if (miniNextButton) {
+    miniNextButton.addEventListener('click', () => {
       if (customTracks.length === 0) return;
       const nextIndex = (activeCustomTrackIndex + 1) % customTracks.length;
       playCustomTrack(nextIndex);
