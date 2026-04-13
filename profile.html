@@ -12,7 +12,8 @@
   <p id="bio"></p>
 </main>
 <script type="module">
-  import { getProfileBySlug } from './pages/utils.js';
+  import { db } from './firebase-config.js';
+  import { doc, getDoc } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
 
   const slug = new URLSearchParams(window.location.search).get('slug');
   const name = document.getElementById('name');
@@ -24,15 +25,22 @@
   if (!slug) {
     name.textContent = 'Missing slug';
   } else {
-    const p = await getProfileBySlug(slug);
-    if (!p) {
+    const claim = await getDoc(doc(db, 'claims', slug));
+    if (!claim.exists()) {
       name.textContent = 'Profile not found';
     } else {
-      name.textContent = p.username || slug;
-      sub.textContent = `wolfiinator.github.io/wolf.lol/${slug}`;
-      bio.textContent = (p.bios || []).join(' • ');
-      if (p.avatarUrl) { avatar.src = p.avatarUrl; avatar.style.display = 'block'; }
-      if (p.backgroundUrl) { bg.src = p.backgroundUrl; bg.style.display = 'block'; }
+      const uid = claim.data().uid;
+      const profile = await getDoc(doc(db, 'profiles', uid));
+      if (!profile.exists()) {
+        name.textContent = 'Profile not found';
+      } else {
+        const p = profile.data();
+        name.textContent = p.username || slug;
+        sub.textContent = `wolfiinator.github.io/wolf.lol/${slug}`;
+        bio.textContent = (p.bios || []).join(' • ');
+        if (p.avatarUrl) { avatar.src = p.avatarUrl; avatar.style.display = 'block'; }
+        if (p.backgroundUrl) { bg.src = p.backgroundUrl; bg.style.display = 'block'; }
+      }
     }
   }
 </script>

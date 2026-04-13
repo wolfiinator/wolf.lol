@@ -1,1 +1,83 @@
-<!doctype html><html><head><meta http-equiv="refresh" content="0; url=./customize/" /></head><body></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wolf.lol | dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#09090e; color:#fff; margin:0; }
+    .wrap { width:min(900px,94vw); margin:24px auto 60px; }
+    .card { background:#141420; border:1px solid #2b2b3f; border-radius:12px; padding:16px; margin-bottom:14px; }
+    label { display:block; margin-top:10px; font-size:14px; color:#c5c8e7; }
+    input,textarea,button,select { width:100%; margin-top:4px; padding:10px; border-radius:8px; border:1px solid #353551; background:#10101a; color:#fff; }
+    button { background:#6673ff; border:none; cursor:pointer; font-weight:700; }
+    .secondary { background:#242438; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:10px; }
+    .tiny { font-size:12px; color:#9da3cc; }
+    .row { border:1px solid #2d2d41; padding:10px; border-radius:8px; margin-top:8px; }
+    #status { min-height:24px; }
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <h1>wolf.lol creator dashboard</h1>
+    <p class="tiny">You are automatically given the <strong>early access</strong> badge.</p>
+
+    <section class="card">
+      <h2>Account</h2>
+      <p id="account"></p>
+      <button id="logout" class="secondary">Log out</button>
+    </section>
+
+    <section class="card">
+      <h2>Claim your subdomain</h2>
+      <label>Subdomain slug (letters, numbers, dash only)</label>
+      <input id="subdomain" placeholder="example: wolf" maxlength="32" />
+      <button id="claim">Claim subdomain</button>
+      <p class="tiny">Your route will map like: wolfiinator.github.io/wolf.lol/&lt;subdomain&gt;</p>
+    </section>
+
+    <section class="card">
+      <h2>Profile content</h2>
+      <div class="grid2">
+        <div>
+          <label>Username</label>
+          <input id="username" maxlength="32" />
+        </div>
+        <div>
+          <label>Profile picture</label>
+          <input id="avatar" type="file" accept="image/*" />
+        </div>
+      </div>
+
+      <label>Background video (MP4, max 25MB)</label>
+      <input id="background" type="file" accept="video/mp4" />
+
+      <div class="grid2">
+        <div>
+          <label>Bio #1</label>
+          <textarea id="bio1" rows="3" maxlength="240"></textarea>
+        </div>
+        <div>
+          <label>Bio #2</label>
+          <textarea id="bio2" rows="3" maxlength="240"></textarea>
+        </div>
+      </div>
+
+      <h3>Links</h3>
+      <p class="tiny">Supported: GitHub, TikTok, YouTube, Roblox, Steam, Custom.</p>
+      <div id="links"></div>
+      <button id="add-link" class="secondary">Add link</button>
+
+      <h3>Music player tracks (max 15)</h3>
+      <div id="tracks"></div>
+      <button id="add-track" class="secondary">Add track</button>
+
+      <button id="save">Save profile</button>
+      <p id="status"></p>
+    </section>
+  </div>
+
+  <script type="module" src="./app-dashboard.js"></script>
+</body>
+</html>

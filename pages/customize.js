@@ -1,7 +1,8 @@
-import { auth, storage } from '../firebase-config.js';
+import { auth, db, storage } from '../firebase-config.js';
 import { onAuthStateChanged, signOut } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-auth.js';
+import { doc, getDoc, setDoc, serverTimestamp } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-firestore.js';
 import { ref, uploadBytes, getDownloadURL } from 'https://www.gstatic.com/firebasejs/12.12.0/firebase-storage.js';
-import { claimSubdomain, getProfile, saveProfile, isMissingDbError } from './utils.js';
+import { claimSubdomain } from './utils.js';
 
 const account = document.getElementById('account');
 const username = document.getElementById('username');
@@ -32,8 +33,9 @@ async function upload(input, path) {
 }
 
 async function loadProfile(uid) {
-  const data = await getProfile(uid);
-  if (!data) return;
+  const snap = await getDoc(doc(db, 'profiles', uid));
+  if (!snap.exists()) return;
+  const data = snap.data();
   username.value = data.username || '';
   bio1.value = data.bios?.[0] || '';
   bio2.value = data.bios?.[1] || '';
@@ -58,21 +60,18 @@ saveBtn.addEventListener('click', async () => {
     const avatarUrl = await upload(avatar, `users/${currentUser.uid}/avatar`);
     const backgroundUrl = await upload(background, `users/${currentUser.uid}/background.mp4`);
 
-    await saveProfile(currentUser.uid, {
+    await setDoc(doc(db, 'profiles', currentUser.uid), {
       username: username.value.trim(),
       avatarUrl,
       backgroundUrl,
       bios: [bio1.value.trim(), bio2.value.trim()].filter(Boolean),
       badges: ['early access'],
-      subdomain: subdomain.value.trim()
-    });
+      subdomain: subdomain.value.trim(),
+      updatedAt: serverTimestamp()
+    }, { merge: true });
 
     setStatus('Profile saved.');
   } catch (e) {
-    if (isMissingDbError(e)) {
-      setStatus('Firestore is not initialized in this project yet; using local browser fallback for now.', true);
-      return;
-    }
     setStatus(e.message, true);
   }
 });
