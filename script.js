@@ -717,9 +717,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         nameIndex -= 1;
       } else if (nameIndex === LEGACY_PROFILE_NAME.length) {
         isNameDeleting = true;
-        await delay(10000);
+        await delay(1800);
         continue;
       } else if (nameIndex === 0) {
+        await delay(500);
         isNameDeleting = false;
       }
 
@@ -728,7 +729,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileName.classList.add('glitch');
         setTimeout(() => profileName.classList.remove('glitch'), 200);
       }
-      await delay(isNameDeleting ? 150 : 300);
+      await delay(isNameDeleting ? 85 : 140);
     }
   }
 
@@ -745,9 +746,10 @@ document.addEventListener('DOMContentLoaded', async () => {
         bioIndex -= 1;
       } else if (bioIndex === currentBio.length) {
         isBioDeleting = true;
-        await delay(2000);
+        await delay(1500);
         continue;
       } else if (bioIndex === 0 && isBioDeleting) {
+        await delay(350);
         isBioDeleting = false;
         bioMessageIndex = (bioMessageIndex + 1) % LEGACY_PROFILE_BIOS.length;
       }
@@ -757,7 +759,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         profileBio.classList.add('glitch');
         setTimeout(() => profileBio.classList.remove('glitch'), 200);
       }
-      await delay(isBioDeleting ? 75 : 150);
+      await delay(isBioDeleting ? 55 : 95);
     }
   }
 
