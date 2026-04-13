@@ -1,1 +1,34 @@
-<!doctype html><html><head><meta http-equiv="refresh" content="0; url=./login/" /></head><body></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>wolf.lol | login</title>
+  <style>
+    body { font-family: Arial, sans-serif; background:#0b0b0f; color:#fff; display:grid; place-items:center; min-height:100vh; margin:0; }
+    .card { width:min(460px,92vw); background:#151521; border:1px solid #2c2c3e; border-radius:14px; padding:20px; }
+    input,button { width:100%; padding:10px; margin:6px 0; border-radius:8px; border:1px solid #32324a; background:#0f0f18; color:#fff; }
+    button { cursor:pointer; background:#5c6cff; border:none; font-weight:700; }
+    .secondary { background:#25253a; }
+    .muted { color:#b6b8d1; font-size:13px; }
+    #msg { min-height: 20px; font-size:14px; }
+  </style>
+</head>
+<body>
+  <main class="card">
+    <h1>wolf.lol access</h1>
+    <p class="muted">Create an account or log in with email + password.</p>
+
+    <input id="email" type="email" placeholder="Email" autocomplete="email" />
+    <input id="password" type="password" placeholder="Password (min 6 chars)" autocomplete="current-password" />
+
+    <button id="signup">Create account</button>
+    <button id="login" class="secondary">Log in</button>
+    <button id="logout" class="secondary">Log out</button>
+    <p id="msg"></p>
+    <p class="muted">After login, you can claim a subdomain and edit your profile.</p>
+  </main>
+
+  <script type="module" src="./app-auth.js"></script>
+</body>
+</html>
