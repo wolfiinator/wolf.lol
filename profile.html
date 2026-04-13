@@ -1,0 +1,39 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>wolf.lol | profile</title>
+<link rel="stylesheet" href="./pages/account.css"/>
+</head><body>
+<main class="card">
+  <h1 id="name">Loading profile...</h1>
+  <p id="sub" class="small"></p>
+  <img id="avatar" alt="avatar" style="max-width:120px;border-radius:10px;display:none"/>
+  <video id="bg" controls loop style="width:100%;display:none"></video>
+  <p id="bio"></p>
+</main>
+<script type="module">
+  import { getProfileBySlug } from './pages/utils.js';
+
+  const slug = new URLSearchParams(window.location.search).get('slug');
+  const name = document.getElementById('name');
+  const sub = document.getElementById('sub');
+  const avatar = document.getElementById('avatar');
+  const bg = document.getElementById('bg');
+  const bio = document.getElementById('bio');
+
+  if (!slug) {
+    name.textContent = 'Missing slug';
+  } else {
+    const p = await getProfileBySlug(slug);
+    if (!p) {
+      name.textContent = 'Profile not found';
+    } else {
+      name.textContent = p.username || slug;
+      sub.textContent = `wolfiinator.github.io/wolf.lol/${slug}`;
+      bio.textContent = (p.bios || []).join(' • ');
+      if (p.avatarUrl) { avatar.src = p.avatarUrl; avatar.style.display = 'block'; }
+      if (p.backgroundUrl) { bg.src = p.backgroundUrl; bg.style.display = 'block'; }
+    }
+  }
+</script>
+</body></html>

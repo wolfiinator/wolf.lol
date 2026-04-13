@@ -1,0 +1,19 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>wolf.lol | signup</title>
+<link rel="stylesheet" href="../pages/account.css"/>
+</head><body>
+<main class="card">
+  <h1>Create account + claim domain</h1>
+  <p class="small">You will claim: <code>wolfiinator.github.io/wolf.lol/&lt;claim&gt;</code>.</p>
+  <label>Email</label><input id="email" type="email" autocomplete="email"/>
+  <label>Password (6+)</label><input id="password" type="password" autocomplete="new-password"/>
+  <label>Domain claim</label><input id="subdomain" maxlength="32" placeholder="wolf"/>
+  <div class="row"><button id="signup">Sign up + claim</button></div>
+  <p id="status"></p>
+  <p class="small">If you see Firestore setup errors, create the database in Google Cloud/Firestore, then reload.</p>
+  <p class="small">Already have account? <a href="../login/">Log in</a></p>
+</main>
+<script type="module" src="../pages/signup.js"></script>
+</body></html>

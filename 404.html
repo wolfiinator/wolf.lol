@@ -1,0 +1,17 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><title>Redirecting…</title></head>
+<body>
+<script>
+  (function () {
+    var path = window.location.pathname.replace(/\/+$/, '');
+    var parts = path.split('/').filter(Boolean);
+    var repoIndex = parts.indexOf('wolf.lol');
+    var slug = parts[repoIndex + 1];
+    if (slug && !['login', 'signup', 'customize', 'profile.html', 'index.html'].includes(slug)) {
+      window.location.replace('/wolf.lol/profile.html?slug=' + encodeURIComponent(slug));
+      return;
+    }
+    window.location.replace('/wolf.lol/');
+  })();
+</script>
+</body></html>

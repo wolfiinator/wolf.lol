@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en"><head>
+<meta charset="UTF-8"/><meta name="viewport" content="width=device-width,initial-scale=1"/>
+<title>wolf.lol | customize</title>
+<link rel="stylesheet" href="../pages/account.css"/>
+</head><body>
+<main class="card">
+  <h1>Customize profile</h1>
+  <p id="account" class="small"></p>
+  <div class="grid">
+    <div><label>Username</label><input id="username" maxlength="32"/></div>
+    <div><label>Profile picture</label><input id="avatar" type="file" accept="image/*"/></div>
+  </div>
+  <label>Background MP4 (max 25MB)</label><input id="background" type="file" accept="video/mp4"/>
+  <div class="grid">
+    <div><label>Bio #1</label><textarea id="bio1" rows="3"></textarea></div>
+    <div><label>Bio #2</label><textarea id="bio2" rows="3"></textarea></div>
+  </div>
+  <label>Subdomain claim</label><input id="subdomain" maxlength="32"/>
+  <div class="row"><button id="claim" class="secondary">Save claim</button></div>
+  <div class="row"><button id="view" class="secondary">View website</button></div>
+  <div class="row"><button id="save">Save profile</button></div>
+  <div class="row"><button id="logout" class="secondary">Log out</button></div>
+  <p id="status"></p>
+  <p class="small">Firestore missing? Set it up in console, then your data will persist online instead of local fallback.</p>
+</main>
+<script type="module" src="../pages/customize.js"></script>
+</body></html>
